@@ -1,0 +1,17 @@
+{
+  "name": "ui-wa1-dashbaord",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend \"npm run start:dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "build-frontend": "cd frontend && npm install && npm run build",
+    "start-frontend": "cd frontend && npm run dev",
+    "build-backend": "cd backend && npm install",
+    "start-backend": "cd backend && npm start",
+    "build": "npm run build-frontend && npm run build-backend",
+    "start": "npm run build && npm run start-backend"
+  },
+  "private": true,
+  "devDependencies": {
+    "concurrently": "10.0.3"
+  }
+}
