@@ -20,9 +20,20 @@
 # production
 /build
 
+
+
 # misc
 .DS_Store
 *.pem
+
+# Codex
+.codex/
+.codex
+**/.codex/
+
+# Cursor
+.cursor/
+**/.cursor/
 
 # debug
 npm-debug.log*

@@ -1,0 +1,232 @@
+.loginPage {
+  --login-blue: #001244;
+  --logo-background: #001244;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 42px 24px;
+  background: var(--logo-background);
+  color: #eef4fa;
+}
+
+.loginCenter {
+  display: grid;
+  gap: 28px;
+  justify-items: center;
+  width: min(448px, 100%);
+}
+
+.brandLockup {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  text-align: left;
+}
+
+.logoMark {
+  display: grid;
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  background: var(--logo-background);
+}
+
+.logoMark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brandLockup h1 {
+  max-width: 220px;
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.loginPanel {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.panelHeader {
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-strong);
+  padding: 24px;
+  text-align: center;
+}
+
+.panelHeader h2 {
+  margin: 0;
+  color: var(--login-blue);
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.loginForm {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+}
+
+.ssoButton,
+.secondaryButton {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 4px;
+  font-weight: 800;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.ssoButton {
+  border: 1px solid var(--login-blue);
+  background: var(--login-blue);
+  color: #ffffff;
+}
+
+.ssoButton:hover,
+.secondaryButton:hover {
+  transform: translateY(-1px);
+}
+
+.microsoftIcon {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.microsoftIcon span {
+  display: block;
+}
+
+.microsoftIcon span:nth-child(1) {
+  background: #f25022;
+}
+
+.microsoftIcon span:nth-child(2) {
+  background: #7fba00;
+}
+
+.microsoftIcon span:nth-child(3) {
+  background: #00a4ef;
+}
+
+.microsoftIcon span:nth-child(4) {
+  background: #ffb900;
+}
+
+.divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  background: var(--line);
+}
+
+.fieldGroup {
+  display: grid;
+  gap: 12px;
+}
+
+.fieldGroup label {
+  margin: 0;
+}
+
+.formOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.remember input {
+  flex: 0 0 auto;
+}
+
+.formOptions a,
+.supportLink {
+  color: var(--login-blue);
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.formOptions a:hover,
+.supportLink:hover {
+  text-decoration: underline;
+}
+
+.secondaryButton {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--login-blue);
+}
+
+.panelFooter {
+  border-top: 1px solid var(--line);
+  background: var(--surface-subtle);
+  padding: 16px 24px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .loginPage {
+    padding: 18px;
+  }
+
+  .brandLockup h1 {
+    font-size: 22px;
+    max-width: 180px;
+  }
+
+  .logoMark {
+    width: 60px;
+    height: 60px;
+  }
+
+  .panelHeader,
+  .loginForm,
+  .panelFooter {
+    padding-inline: 18px;
+  }
+
+  .formOptions {
+    display: grid;
+  }
+}

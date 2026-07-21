@@ -1,0 +1,124 @@
+.contentSplit {
+  display: grid;
+  grid-template-columns: 302px minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.sidePanel {
+  min-width: 0;
+}
+
+.sidePanel section {
+  margin-bottom: 16px;
+}
+
+.detailList {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.detailList div {
+  display: grid;
+  gap: 3px;
+  border-bottom: 1px solid var(--line);
+  padding: 11px 13px;
+}
+
+.detailList div:last-child {
+  border-bottom: 0;
+}
+
+.detailList dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: capitalize;
+}
+
+.detailList dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.stageStack {
+  display: grid;
+  gap: 8px;
+  counter-reset: stage;
+}
+
+.stageStack span {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  padding: 11px 12px 11px 36px;
+  color: var(--foreground);
+  font-weight: 750;
+}
+
+.stageStack span::before {
+  counter-increment: stage;
+  content: counter(stage);
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.stageStack .active {
+  border-color: #b8c8da;
+  background: var(--accent-soft);
+}
+
+.causalFlow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.causalFlow span {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  padding: 13px 12px;
+  color: var(--navy);
+  text-align: center;
+  font-weight: 800;
+}
+
+.causalFlow span:nth-child(2n) {
+  background: var(--surface-subtle);
+}
+
+.causalFlow span:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  width: 12px;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+@media (max-width: 900px) {
+  .contentSplit,
+  .causalFlow {
+    grid-template-columns: 1fr;
+  }
+}

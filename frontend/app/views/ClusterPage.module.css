@@ -1,0 +1,136 @@
+.contentSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 302px;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.sidePanel {
+  min-width: 0;
+}
+
+.sidePanel section {
+  margin-bottom: 16px;
+}
+
+.flowCanvas {
+  height: clamp(560px, calc(100vh - 220px), 760px);
+  min-height: 560px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  box-shadow: none;
+}
+
+.detailList {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.detailList div {
+  display: grid;
+  gap: 3px;
+  border-bottom: 1px solid var(--line);
+  padding: 11px 13px;
+}
+
+.detailList div:last-child {
+  border-bottom: 0;
+}
+
+.detailList dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: capitalize;
+}
+
+.detailList dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.healthRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  padding: 12px 14px;
+}
+
+.healthRow span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--foreground);
+  font-size: 13px;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--idle);
+}
+
+.good {
+  background: var(--good);
+}
+
+.warn {
+  background: var(--warn);
+}
+
+.hot {
+  background: var(--hot);
+}
+
+.flowNode {
+  min-width: 144px !important;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: 4px !important;
+  background: #ffffff !important;
+  color: var(--navy) !important;
+  padding: 10px 12px !important;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(15, 39, 66, 0.04) !important;
+}
+
+.patientNode {
+  border-color: var(--accent) !important;
+  background: #f6f9fc !important;
+}
+
+.flowCanvas :global(.react-flow__attribution) {
+  background: rgba(255, 255, 255, 0.78) !important;
+  color: var(--muted) !important;
+}
+
+.flowCanvas :global(.react-flow__controls),
+.flowCanvas :global(.react-flow__minimap) {
+  border: 1px solid var(--line) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+.flowCanvas :global(.react-flow__controls-button) {
+  border-bottom: 1px solid var(--line) !important;
+  background: var(--surface) !important;
+}
+
+@media (max-width: 900px) {
+  .contentSplit {
+    grid-template-columns: 1fr;
+  }
+}

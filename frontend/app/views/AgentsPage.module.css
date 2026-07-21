@@ -1,0 +1,88 @@
+.agentsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+  min-height: calc(100vh - 170px);
+}
+
+.agentsGrid section {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+.agentsGrid section > div {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.chatArea,
+.tableFill {
+  flex: 1;
+  min-height: 0;
+}
+
+.chatArea {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-height: 160px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  padding: 12px;
+}
+
+.chat {
+  width: fit-content;
+  max-width: 78%;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  padding: 10px 12px;
+}
+
+.agent {
+  justify-self: end;
+  border-color: #c8d7e5;
+  background: var(--accent-soft);
+}
+
+.chatInput {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 12px;
+}
+
+.chatInput button {
+  min-height: 38px;
+  border: 1px solid var(--navy);
+  border-radius: 4px;
+  background: var(--navy);
+  color: #ffffff;
+  padding: 9px 14px;
+  font-weight: 750;
+}
+
+.tableFill table {
+  height: 100%;
+}
+
+@media (max-width: 900px) {
+  .agentsGrid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .agentsGrid section > div {
+    min-height: 320px;
+  }
+}

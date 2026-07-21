@@ -1,0 +1,122 @@
+{
+  "profile": {
+    "name": "Guilherme Barnes",
+    "email": "guilherme.barnes@example.org",
+    "role": "Research lead",
+    "workspace": "Multi Omics Dashboard"
+  },
+  "experiments": [
+    {
+      "id": "EXP-042",
+      "name": "CPTAC BRCA twin integration",
+      "dataset": "CPTAC-BRCA",
+      "updatedAt": "2026-07-20T08:40:00Z",
+      "status": "Running"
+    },
+    {
+      "id": "EXP-039",
+      "name": "Proteomics discordance screen",
+      "dataset": "CPTAC-LUAD",
+      "updatedAt": "2026-07-19T16:15:00Z",
+      "status": "Review"
+    },
+    {
+      "id": "EXP-034",
+      "name": "Stage progression baseline",
+      "dataset": "GTEx + CPTAC-COAD",
+      "updatedAt": "2026-07-18T11:05:00Z",
+      "status": "Ready"
+    }
+  ],
+  "datasets": [
+    {
+      "id": "DS-001",
+      "name": "TCGA Breast",
+      "type": "Transcriptomics",
+      "samples": 1094,
+      "features": 20531,
+      "updated": "2026-07-18",
+      "quality": 96
+    },
+    {
+      "id": "DS-002",
+      "name": "CPTAC BRCA",
+      "type": "Proteomics",
+      "samples": 122,
+      "features": 8942,
+      "updated": "2026-07-20",
+      "quality": 93
+    },
+    {
+      "id": "DS-003",
+      "name": "GTEx Breast Tissue",
+      "type": "Healthy baseline",
+      "samples": 337,
+      "features": 19648,
+      "updated": "2026-07-17",
+      "quality": 98
+    }
+  ],
+  "workflowSteps": [
+    { "id": "preprocessing", "label": "Pre-processing", "status": "Complete", "detail": "Quality control, batch correction and feature alignment completed." },
+    { "id": "integration", "label": "Multi-Omics Integration", "status": "Running", "detail": "MOFA and GNN layers combining RNA, protein and methylation signals." },
+    { "id": "training", "label": "Training", "status": "Pending", "detail": "Digital twin graph training queued after integration finishes." },
+    { "id": "evaluation", "label": "Evaluation", "status": "Pending", "detail": "ROC, AUC and survival metrics will run after training." }
+  ],
+  "omicsLayers": {
+    "dnaMethylation": {
+      "label": "DNA Methylation",
+      "matrix": {
+        "rows": 4821,
+        "columns": 122,
+        "missing": "0.8%",
+        "format": "Beta values"
+      },
+      "rows": [
+        { "feature": "cg00000108", "sampleA": 0.82, "sampleB": 0.71, "sampleC": 0.68, "cohort": "BRCA" },
+        { "feature": "cg00000109", "sampleA": 0.44, "sampleB": 0.39, "sampleC": 0.41, "cohort": "BRCA" },
+        { "feature": "cg00000165", "sampleA": 0.91, "sampleB": 0.88, "sampleC": 0.85, "cohort": "BRCA" },
+        { "feature": "cg00000236", "sampleA": 0.23, "sampleB": 0.31, "sampleC": 0.28, "cohort": "BRCA" },
+        { "feature": "cg00000289", "sampleA": 0.57, "sampleB": 0.62, "sampleC": 0.59, "cohort": "BRCA" }
+      ]
+    },
+    "transcriptomics": {
+      "label": "Transcriptomics",
+      "matrix": {
+        "rows": 20531,
+        "columns": 1094,
+        "missing": "1.2%",
+        "format": "TPM normalised"
+      },
+      "rows": [
+        { "feature": "TP53", "sampleA": 2.8, "sampleB": 1.9, "sampleC": 2.1, "cohort": "BRCA" },
+        { "feature": "PIK3CA", "sampleA": 1.7, "sampleB": 2.4, "sampleC": 1.9, "cohort": "BRCA" },
+        { "feature": "ESR1", "sampleA": -1.6, "sampleB": -0.8, "sampleC": -1.1, "cohort": "BRCA" },
+        { "feature": "ERBB2", "sampleA": 2.2, "sampleB": 3.1, "sampleC": 2.6, "cohort": "BRCA" },
+        { "feature": "BRCA1", "sampleA": -1.9, "sampleB": -1.4, "sampleC": -1.7, "cohort": "BRCA" }
+      ]
+    },
+    "proteomics": {
+      "label": "Proteomics",
+      "matrix": {
+        "rows": 8942,
+        "columns": 122,
+        "missing": "2.4%",
+        "format": "Log2 abundance"
+      },
+      "rows": [
+        { "feature": "TP53", "sampleA": -0.4, "sampleB": 0.2, "sampleC": -0.1, "cohort": "BRCA" },
+        { "feature": "PIK3CA", "sampleA": 1.2, "sampleB": 0.9, "sampleC": 1.0, "cohort": "BRCA" },
+        { "feature": "ESR1", "sampleA": 0.8, "sampleB": 1.1, "sampleC": 0.7, "cohort": "BRCA" },
+        { "feature": "ERBB2", "sampleA": 2.5, "sampleB": 2.1, "sampleC": 2.3, "cohort": "BRCA" },
+        { "feature": "BRCA1", "sampleA": -1.2, "sampleB": -0.9, "sampleC": -1.0, "cohort": "BRCA" }
+      ]
+    }
+  },
+  "activityLog": [
+    { "time": "09:41", "agent": "Transcriptomics", "action": "Model query", "input": "BRCA stage II expression matrix", "output": "14 cell states classified", "duration": "28 s" },
+    { "time": "09:38", "agent": "Proteomics", "action": "Data access", "input": "Mass spec abundance table", "output": "742 discordant genes found", "duration": "11 s" },
+    { "time": "09:34", "agent": "Genomics", "action": "Tool call", "input": "TP53, BRCA1, PIK3CA variants", "output": "Variant impact scores returned", "duration": "42 s" },
+    { "time": "09:20", "agent": "Dashboard", "action": "Dataset upload", "input": "TCGA Breast transcriptomics matrix", "output": "Matrix validated and indexed", "duration": "1 m 04 s" }
+  ]
+}

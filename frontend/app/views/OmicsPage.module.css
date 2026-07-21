@@ -1,0 +1,116 @@
+.contentSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 302px;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.sidePanel {
+  min-width: 0;
+}
+
+.sidePanel section {
+  margin-bottom: 16px;
+}
+
+.circos {
+  position: relative;
+  width: min(440px, 100%);
+  aspect-ratio: 1;
+  margin: 8px auto;
+  border: 28px solid var(--navy-soft);
+  border-radius: 999px;
+  background: radial-gradient(circle, #ffffff 0 30%, #eef2f6 31% 44%, #ffffff 45% 53%, #e8f1f8 54% 56%, #ffffff 57%);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.circos span {
+  position: absolute;
+  left: 50%;
+  top: -28px;
+  width: 2px;
+  height: calc(100% + 56px);
+  background: rgba(54, 91, 143, 0.38);
+  transform-origin: 50% calc(50% + 28px);
+}
+
+.circos b,
+.circos i {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--navy);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+  padding: 5px 10px;
+}
+
+.circos b {
+  top: 37%;
+}
+
+.circos i {
+  top: 52%;
+}
+
+.legend,
+.checks {
+  display: grid;
+  gap: 9px;
+}
+
+.legend span,
+.checks label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--foreground);
+}
+
+.legend b {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.dna {
+  background: var(--omics-teal);
+}
+
+.rna {
+  background: var(--omics-indigo);
+}
+
+.protein {
+  background: var(--omics-coral);
+}
+
+.discordant {
+  background: var(--warn);
+}
+
+.metricLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  padding: 8px 0;
+}
+
+.metricLine:last-child {
+  border-bottom: 0;
+}
+
+.metricLine b {
+  color: var(--navy);
+}
+
+@media (max-width: 900px) {
+  .contentSplit {
+    grid-template-columns: 1fr;
+  }
+}
