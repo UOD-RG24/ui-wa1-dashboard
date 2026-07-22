@@ -58,8 +58,3 @@ export type ActivityLogEntry = {
   output: string;
   duration: string;
 };
-
-export type Message = {
-  from: "user" | "agent";
-  text: string;
-};

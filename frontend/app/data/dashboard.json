@@ -5,66 +5,6 @@
     "role": "Research lead",
     "workspace": "Multi Omics Dashboard"
   },
-  "kpis": [
-    { "label": "Active twins", "value": "128" },
-    { "label": "Discordant genes", "value": "742" },
-    { "label": "Cohort coverage", "value": "97%" },
-    { "label": "Queued runs", "value": "2" }
-  ],
-  "cohorts": [
-    { "code": "BRCA", "name": "Breast", "patients": 122, "stages": [18, 41, 37, 26], "risk": "Medium" },
-    { "code": "LUAD", "name": "Lung", "patients": 94, "stages": [12, 28, 31, 23], "risk": "High" },
-    { "code": "COAD", "name": "Colon", "patients": 81, "stages": [15, 22, 27, 17], "risk": "Medium" },
-    { "code": "OV", "name": "Ovarian", "patients": 66, "stages": [9, 19, 21, 17], "risk": "High" }
-  ],
-  "patient": {
-    "id": "CPTAC-BRCA-0042",
-    "cohort": "BRCA",
-    "stage": "II",
-    "age": "54",
-    "sex": "Female",
-    "primarySite": "Breast",
-    "riskSignal": "Medium",
-    "focusGenes": "ERBB2 / PIK3CA"
-  },
-  "omicsRows": [
-    { "gene": "TP53", "rna": 2.8, "protein": -0.4, "pathway": "p53 signalling", "direction": "Discordant" },
-    { "gene": "PIK3CA", "rna": 1.7, "protein": 1.2, "pathway": "PI3K-AKT", "direction": "Concordant" },
-    { "gene": "ESR1", "rna": -1.6, "protein": 0.8, "pathway": "Estrogen response", "direction": "Discordant" },
-    { "gene": "ERBB2", "rna": 2.2, "protein": 2.5, "pathway": "ErbB signalling", "direction": "Concordant" },
-    { "gene": "BRCA1", "rna": -1.9, "protein": -1.2, "pathway": "DNA repair", "direction": "Concordant" },
-    { "gene": "MYC", "rna": 1.4, "protein": 0.3, "pathway": "Cell cycle", "direction": "Discordant" }
-  ],
-  "foundationModels": [
-    {
-      "name": "OmicsTwin-G",
-      "domain": "Genomics",
-      "confidence": 91,
-      "input": "TP53 / BRCA1 variant panel",
-      "output": "Pathogenic impact ranked for 3 drivers"
-    },
-    {
-      "name": "OmicsTwin-T",
-      "domain": "Transcriptomics",
-      "confidence": 88,
-      "input": "BRCA stage II expression matrix",
-      "output": "14 cell states classified"
-    },
-    {
-      "name": "OmicsTwin-P",
-      "domain": "Proteomics",
-      "confidence": 84,
-      "input": "Mass spec abundance table",
-      "output": "742 discordant genes flagged"
-    },
-    {
-      "name": "OmicsTwin-X",
-      "domain": "Integration",
-      "confidence": 79,
-      "input": "RNA + protein paired features",
-      "output": "Cross-omics latent factors ready"
-    }
-  ],
   "experiments": [
     {
       "id": "EXP-042",
