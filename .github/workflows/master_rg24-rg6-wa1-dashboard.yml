@@ -26,21 +26,33 @@ jobs:
         with:
           node-version: "24.x"
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+            backend/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          npm ci --prefix frontend
+          npm ci --prefix backend
 
       - name: Build application
-        run: npm run build --if-present
+        run: |
+          npm run build --prefix frontend
+          npm run build --prefix backend
 
       - name: Run tests
         run: npm run test --if-present
 
+      - name: Prepare production dependencies
+        run: |
+          rm -rf node_modules frontend/node_modules backend/node_modules
+          npm ci --omit=dev --prefix frontend
+          npm ci --omit=dev --prefix backend
+
       - name: Remove unnecessary files
         run: |
-          rm -rf node_modules
-          rm -rf backend/node_modules
-          rm -rf frontend/node_modules
           rm -rf frontend/.next/cache
           rm -rf .git
           rm -rf .github
@@ -57,7 +69,6 @@ jobs:
             !.git/**
             !.github/**
             !.vs/**
-            !**/node_modules/**
             !frontend/.next/cache/**
             !coverage/**
             !**/*.log

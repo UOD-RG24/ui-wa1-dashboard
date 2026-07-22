@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "concurrently -n backend,frontend \"npm run start:dev --prefix backend\" \"npm run dev --prefix frontend\"",
-    "build-frontend": "cd frontend && npm install && npm run build",
-    "start-frontend": "cd frontend && npm run dev",
-    "build-backend": "cd backend && npm install",
-    "start-backend": "cd backend && npm start",
+    "build-frontend": "npm install --prefix frontend && npm run build --prefix frontend",
+    "build-backend": "npm install --prefix backend && npm run build --prefix backend",
     "build": "npm run build-frontend && npm run build-backend",
-    "start": "npm run build && npm run start-backend"
+    "start": "npm run start --prefix frontend",
+    "start:backend": "npm run start:prod --prefix backend"
   },
   "private": true,
   "devDependencies": {
