@@ -45,33 +45,44 @@ jobs:
       - name: Run tests
         run: npm run test --if-present
 
-      - name: Prepare production dependencies
+      - name: Prepare production frontend dependencies
         run: |
-          rm -rf node_modules frontend/node_modules backend/node_modules
+          rm -rf frontend/node_modules
           npm ci --omit=dev --prefix frontend
-          npm ci --omit=dev --prefix backend
 
-      - name: Remove unnecessary files
+      - name: Create lean deployment zip
         run: |
-          rm -rf frontend/.next/cache
-          rm -rf .git
-          rm -rf .github
-          rm -rf .vs
-          rm -rf coverage
-          find . -type f -name "*.log" -delete
+          mkdir -p deploy-package/frontend
+          # Runtime package.json has NO build script so Oryx cannot rebuild on Azure
+          printf '%s\n' \
+            '{' \
+            '  "name": "ui-wa1-dashbaord",' \
+            '  "version": "1.0.0",' \
+            '  "private": true,' \
+            '  "scripts": {' \
+            '    "start": "npm run start --prefix frontend"' \
+            '  }' \
+            '}' > deploy-package/package.json
+          printf '%s\n' \
+            '[config]' \
+            'SCM_DO_BUILD_DURING_DEPLOYMENT = false' > deploy-package/.deployment
+          cp frontend/package.json frontend/package-lock.json frontend/next.config.ts deploy-package/frontend/
+          cp -r frontend/.next frontend/public frontend/node_modules deploy-package/frontend/
+          if [ -f frontend/next-env.d.ts ]; then cp frontend/next-env.d.ts deploy-package/frontend/; fi
+          cd deploy-package
+          zip -r ../deploy.zip . -q
+          cd ..
+          ls -lh deploy.zip
+          echo "--- package.json in zip ---"
+          unzip -p deploy.zip package.json
+          echo "--- zip contents (top) ---"
+          unzip -l deploy.zip | head -n 40
 
       - name: Upload deployment artifact
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: |
-            .
-            !.git/**
-            !.github/**
-            !.vs/**
-            !frontend/.next/cache/**
-            !coverage/**
-            !**/*.log
+          path: deploy.zip
           retention-days: 1
 
   deploy:
@@ -83,7 +94,41 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-          path: deploy
+          path: .
+
+      - name: Disable Oryx and free App Service disk
+        shell: bash
+        env:
+          PUBLISH_PROFILE: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E369C23060DC407CB81CF489E82BE379 }}
+        run: |
+          set -euo pipefail
+          USERNAME=$(printf '%s' "$PUBLISH_PROFILE" | sed -n 's/.*userName="\([^"]*\)".*/\1/p' | head -n 1)
+          PASSWORD=$(printf '%s' "$PUBLISH_PROFILE" | sed -n 's/.*userPWD="\([^"]*\)".*/\1/p' | head -n 1)
+          if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
+            echo "Could not parse publish profile credentials"
+            exit 1
+          fi
+          SCM="https://rg24-rg6-wa1-dashboard.scm.azurewebsites.net"
+
+          # OneDeploy ignores .deployment alone — set SCM settings via Kudu
+          curl --fail --silent --show-error \
+            -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/json" \
+            -X POST \
+            "$SCM/api/settings" \
+            -d '{"SCM_DO_BUILD_DURING_DEPLOYMENT":"false","ENABLE_ORYX_BUILD":"false"}'
+          echo
+          echo "Remote build disabled."
+
+          # Previous failed Oryx builds leave /home/site/wwwroot full (rsync broken pipe / ENOSPC)
+          curl --fail --silent --show-error \
+            -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/json" \
+            -X POST \
+            "$SCM/api/command" \
+            -d '{"command":"bash -lc \"rm -rf /home/site/wwwroot/* /tmp/zipdeploy /tmp/oryx /tmp/8dee* 2>/dev/null || true; df -h /home\"","dir":"/home"}'
+          echo
+          echo "App Service disk cleaned."
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -91,5 +136,5 @@ jobs:
         with:
           app-name: rg24-rg6-wa1-dashboard
           slot-name: Production
-          package: deploy
+          package: deploy.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E369C23060DC407CB81CF489E82BE379 }}
