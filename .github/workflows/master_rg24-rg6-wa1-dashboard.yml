@@ -111,7 +111,7 @@ jobs:
           SCM="https://rg24-rg6-wa1-dashboard.scm.azurewebsites.net"
 
           # OneDeploy ignores .deployment alone — set SCM settings via Kudu
-          curl --fail --silent --show-error \
+          curl --fail --silent --show-error --max-time 60 \
             -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/json" \
             -X POST \
@@ -120,15 +120,22 @@ jobs:
           echo
           echo "Remote build disabled."
 
-          # Previous failed Oryx builds leave /home/site/wwwroot full (rsync broken pipe / ENOSPC)
-          curl --fail --silent --show-error \
+          # Best-effort cleanup only. A full rm via /api/command often 504s on full disks
+          # and must not block deployment when Oryx is already disabled.
+          set +e
+          curl --silent --show-error --max-time 120 \
             -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/json" \
             -X POST \
             "$SCM/api/command" \
-            -d '{"command":"bash -lc \"rm -rf /home/site/wwwroot/* /tmp/zipdeploy /tmp/oryx /tmp/8dee* 2>/dev/null || true; df -h /home\"","dir":"/home"}'
-          echo
-          echo "App Service disk cleaned."
+            -d '{"command":"rm -rf /tmp/zipdeploy /tmp/oryx","dir":"/tmp"}'
+          CLEAN_STATUS=$?
+          set -e
+          if [ "$CLEAN_STATUS" -ne 0 ]; then
+            echo "Disk cleanup timed out or failed (exit $CLEAN_STATUS). Continuing with deploy."
+          else
+            echo "Temp deploy folders cleaned."
+          fi
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
