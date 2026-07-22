@@ -1,0 +1,87 @@
+.toastStack {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 1000;
+  display: grid;
+  gap: 10px;
+  width: min(380px, calc(100vw - 36px));
+}
+
+.toast {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.statusIcon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.info {
+  background: var(--accent-soft);
+  color: var(--navy);
+}
+
+.success {
+  background: var(--good-soft);
+  color: var(--good);
+}
+
+.warning {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.error {
+  background: var(--hot-soft);
+  color: var(--hot);
+}
+
+.body {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.description {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.close {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-strong);
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.close:hover {
+  border-color: var(--line-strong);
+  color: var(--navy);
+}

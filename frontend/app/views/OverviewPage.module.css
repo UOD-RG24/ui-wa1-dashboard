@@ -1,0 +1,132 @@
+.overviewHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.8fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.heroPanel {
+  min-height: 220px;
+  border-color: #cad4df;
+  background: var(--surface);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, 0.56fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.heroGrid h2 {
+  margin: 5px 0 8px;
+  color: var(--navy);
+  font-size: 30px;
+  font-weight: 850;
+  line-height: 1.05;
+  max-width: 620px;
+}
+
+.heroMetrics {
+  display: grid;
+  gap: 8px;
+}
+
+.heroMetrics span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  padding: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.heroMetrics b {
+  color: var(--navy);
+  font-size: 18px;
+}
+
+.qualityRings {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.ringMetric {
+  display: grid;
+  min-height: 94px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  color: var(--navy);
+  text-align: center;
+}
+
+.ringMetric b {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ringMetric span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.kpiCard,
+.cohortCard {
+  min-height: 146px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kpiCard::after {
+  content: "";
+  display: block;
+  height: 38px;
+  margin-top: auto;
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, transparent 0 10%, var(--line) 10% 16%, transparent 16% 28%, var(--line-strong) 28% 35%, transparent 35% 52%, var(--line) 52% 60%, transparent 60% 76%, var(--line-strong) 76% 84%, transparent 84%),
+    var(--surface-subtle);
+}
+
+.kpiValue {
+  color: var(--navy);
+  font-size: 34px !important;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.cardFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cardFoot b {
+  color: var(--foreground);
+}
+
+@media (max-width: 1180px) {
+  .overviewHero {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .overviewHero,
+  .heroGrid {
+    grid-template-columns: 1fr;
+  }
+}

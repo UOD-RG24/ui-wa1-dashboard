@@ -1,0 +1,70 @@
+.datasetStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.datasetStats span {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  padding: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.datasetStats b {
+  color: var(--navy);
+  font-size: 18px;
+}
+
+.layerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.matrixInfo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.matrixInfo span {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  padding: 10px;
+  font-size: 13px;
+}
+
+.matrixInfo b {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.visualiseButton {
+  width: 100%;
+  margin-top: 12px;
+}
+
+@media (max-width: 1180px) {
+  .datasetStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .datasetStats,
+  .layerGrid,
+  .matrixInfo {
+    grid-template-columns: 1fr;
+  }
+}
