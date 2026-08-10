@@ -144,4 +144,5 @@ jobs:
           app-name: rg24-rg6-wa1-dashboard
           slot-name: Production
           package: deploy.zip
+          clean: true
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E369C23060DC407CB81CF489E82BE379 }}
