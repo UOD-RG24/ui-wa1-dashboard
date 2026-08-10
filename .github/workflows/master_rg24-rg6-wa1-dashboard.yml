@@ -111,15 +111,23 @@ jobs:
           fi
           SCM="https://rg24-rg6-wa1-dashboard.scm.azurewebsites.net"
 
-          # OneDeploy ignores .deployment alone — set SCM settings via Kudu
+          # OneDeploy ignores .deployment alone — try to set SCM settings via Kudu.
+          # If Azure rejects this management call, the deploy should still proceed.
+          set +e
           curl --fail --silent --show-error --max-time 60 \
             -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/json" \
             -X POST \
             "$SCM/api/settings" \
             -d '{"SCM_DO_BUILD_DURING_DEPLOYMENT":"false","ENABLE_ORYX_BUILD":"false"}'
-          echo
-          echo "Remote build disabled."
+          SETTINGS_STATUS=$?
+          set -e
+          if [ "$SETTINGS_STATUS" -ne 0 ]; then
+            echo "Remote build settings update failed (exit $SETTINGS_STATUS). Continuing with deploy."
+          else
+            echo
+            echo "Remote build disabled."
+          fi
 
           # Best-effort cleanup only. A full rm via /api/command often 504s on full disks
           # and must not block deployment when Oryx is already disabled.
