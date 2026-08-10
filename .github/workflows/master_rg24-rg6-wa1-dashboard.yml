@@ -60,13 +60,14 @@ jobs:
             '  "version": "1.0.0",' \
             '  "private": true,' \
             '  "scripts": {' \
-            '    "start": "npm run start --prefix frontend"' \
+            '    "start": "cd frontend && node node_modules/next/dist/bin/next start"' \
             '  }' \
             '}' > deploy-package/package.json
           printf '%s\n' \
             '[config]' \
             'SCM_DO_BUILD_DURING_DEPLOYMENT = false' > deploy-package/.deployment
           cp frontend/package.json frontend/package-lock.json frontend/next.config.ts deploy-package/frontend/
+          npm pkg set scripts.start="node node_modules/next/dist/bin/next start" --prefix deploy-package/frontend
           cp -r frontend/.next frontend/public frontend/node_modules deploy-package/frontend/
           if [ -f frontend/next-env.d.ts ]; then cp frontend/next-env.d.ts deploy-package/frontend/; fi
           cd deploy-package
