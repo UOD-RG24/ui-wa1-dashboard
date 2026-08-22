@@ -74,6 +74,31 @@
   text-transform: uppercase;
 }
 
+.sidebarAction {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  border-radius: 4px;
+  background: transparent;
+  color: #eef4fa;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sidebarAction:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.emptyHint {
+  margin: 0 0 8px 4px;
+  color: rgba(238, 244, 250, 0.55);
+  font-size: 12px;
+}
+
 .navList {
   display: grid;
   gap: 6px;

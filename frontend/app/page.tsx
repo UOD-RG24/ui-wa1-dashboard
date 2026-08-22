@@ -1,42 +1,94 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
 import { AuthGate } from "./components/auth/AuthGate";
-import { DashboardShell, datasets, experiments } from "./components/dashboard/DashboardShell";
+import { DashboardShell } from "./components/dashboard/DashboardShell";
 import { useAppShell } from "./components/providers/AppProviders";
-import { signOut } from "./lib/api";
-import type { ApiUser } from "./lib/apiTypes";
+import { listDatasets, listExperiments, signOut } from "./lib/api";
+import { ApiError } from "./lib/apiClient";
+import type { ApiDataset, ApiExperiment, ApiUser } from "./lib/apiTypes";
 import { clearAuthSession } from "./lib/authStorage";
+import { mapDataset, mapExperiment } from "./lib/mappers";
 import { ToastModel } from "./models/toast";
-import type { MainView } from "./types";
+import type { DatasetItem, Experiment, MainView } from "./types";
 import { DatasetsPage } from "./views/DatasetsPage";
 import { ExperimentPage } from "./views/ExperimentPage";
 import { ProfilePage } from "./views/ProfilePage";
+
+function sortExperiments(items: Experiment[]) {
+  return [...items].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+}
+
+function sortDatasets(items: DatasetItem[]) {
+  return [...items].sort((a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime());
+}
 
 function DashboardHome({ user }: { user: ApiUser }) {
   const router = useRouter();
   const { showToast } = useAppShell();
   const [mainView, setMainView] = useState<MainView>("experiment");
-  const [selectedExperimentId, setSelectedExperimentId] = useState(experiments[0]?.id ?? "");
-  const [selectedDatasetId, setSelectedDatasetId] = useState(datasets[0]?.id ?? "");
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [apiDatasets, setApiDatasets] = useState<ApiDataset[]>([]);
+  const [apiExperiments, setApiExperiments] = useState<ApiExperiment[]>([]);
+  const [selectedExperimentId, setSelectedExperimentId] = useState("");
+  const [selectedDatasetId, setSelectedDatasetId] = useState("");
+
+  const datasets = useMemo(() => sortDatasets(apiDatasets.map(mapDataset)), [apiDatasets]);
+  const experiments = useMemo(() => sortExperiments(apiExperiments.map(mapExperiment)), [apiExperiments]);
 
   const selectedExperiment = useMemo(
     () => experiments.find((item) => item.id === selectedExperimentId) ?? experiments[0],
-    [selectedExperimentId],
+    [experiments, selectedExperimentId],
   );
-
   const selectedDataset = useMemo(
     () => datasets.find((item) => item.id === selectedDatasetId) ?? datasets[0],
-    [selectedDatasetId],
+    [datasets, selectedDatasetId],
   );
+
+  const refreshLists = useCallback(async () => {
+    const [datasetRows, experimentRows] = await Promise.all([listDatasets(), listExperiments()]);
+    setApiDatasets(datasetRows);
+    setApiExperiments(experimentRows);
+    setSelectedDatasetId((current) =>
+      current && datasetRows.some((item) => item.id === current) ? current : datasetRows[0]?.id ?? "",
+    );
+    setSelectedExperimentId((current) =>
+      current && experimentRows.some((item) => item.id === current) ? current : experimentRows[0]?.id ?? "",
+    );
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        await refreshLists();
+      } catch (error) {
+        if (!cancelled) {
+          showToast(
+            new ToastModel({
+              title: "Could not load workspace",
+              description: error instanceof ApiError ? error.message : "Failed to load datasets and experiments.",
+              status: "error",
+            }),
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshLists, showToast]);
 
   const handleSignOut = async () => {
     try {
       await signOut();
     } catch {
-      // Always clear local session.
+      // ignore
     } finally {
       clearAuthSession();
       showToast(
@@ -50,9 +102,19 @@ function DashboardHome({ user }: { user: ApiUser }) {
     }
   };
 
+  if (loading) {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+        <p>Loading workspace…</p>
+      </main>
+    );
+  }
+
   return (
     <DashboardShell
       mainView={mainView}
+      experiments={experiments}
+      datasets={datasets}
       selectedExperimentId={selectedExperimentId}
       selectedDatasetId={selectedDatasetId}
       isCollapsed={isCollapsed}
@@ -70,7 +132,9 @@ function DashboardHome({ user }: { user: ApiUser }) {
         void handleSignOut();
       }}
     >
-      {mainView === "experiment" && selectedExperiment ? <ExperimentPage experiment={selectedExperiment} /> : null}
+      {mainView === "experiment" && selectedExperiment ? (
+        <ExperimentPage experiment={selectedExperiment} datasets={datasets} />
+      ) : null}
       {mainView === "dataset" && selectedDataset ? <DatasetsPage dataset={selectedDataset} /> : null}
       {mainView === "profile" ? <ProfilePage user={user} /> : null}
     </DashboardShell>

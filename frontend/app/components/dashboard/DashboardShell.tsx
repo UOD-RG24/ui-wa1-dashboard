@@ -3,24 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FiActivity, FiChevronLeft, FiChevronRight, FiDatabase, FiHardDrive, FiLogOut, FiUser } from "react-icons/fi";
-import data from "../../data/dashboard.json";
 import type { DatasetItem, Experiment, MainView } from "../../types";
 import derbyLogo from "../../university-of-derby-logo-01.webp";
 import styles from "./DashboardShell.module.css";
 
-function sortByLatestExperiments(items: Experiment[]) {
-  return [...items].sort((left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime());
-}
-
-function sortByLatestDatasets(items: DatasetItem[]) {
-  return [...items].sort((left, right) => new Date(right.updated).getTime() - new Date(left.updated).getTime());
-}
-
-const experiments = sortByLatestExperiments(data.experiments as Experiment[]);
-const datasets = sortByLatestDatasets(data.datasets as DatasetItem[]);
-
 export function DashboardShell({
   mainView,
+  experiments,
+  datasets,
   selectedExperimentId,
   selectedDatasetId,
   isCollapsed,
@@ -32,6 +22,8 @@ export function DashboardShell({
   children,
 }: {
   mainView: MainView;
+  experiments: Experiment[];
+  datasets: DatasetItem[];
   selectedExperimentId: string;
   selectedDatasetId: string;
   isCollapsed: boolean;
@@ -70,6 +62,9 @@ export function DashboardShell({
             </p>
           ) : null}
           <nav className={styles.navList} aria-label="Experiments">
+            {experiments.length === 0 && !isCollapsed ? (
+              <p className={styles.emptyHint}>No experiments yet</p>
+            ) : null}
             {experiments.map((experiment) => (
               <button
                 key={experiment.id}
@@ -99,6 +94,9 @@ export function DashboardShell({
             </p>
           ) : null}
           <nav className={styles.navList} aria-label="Datasets">
+            {datasets.length === 0 && !isCollapsed ? (
+              <p className={styles.emptyHint}>No datasets yet</p>
+            ) : null}
             {datasets.map((dataset) => (
               <button
                 key={dataset.id}
@@ -160,5 +158,3 @@ export function DashboardShell({
     </div>
   );
 }
-
-export { experiments, datasets };

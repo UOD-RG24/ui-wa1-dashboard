@@ -10,17 +10,22 @@ import {
   type Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import data from "../data/dashboard.json";
 import { useAppShell } from "../components/providers/AppProviders";
 import { Panel } from "../components/ui/Panel";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { Section } from "../components/ui/Section";
 import ui from "../components/ui/Ui.module.css";
 import { ToastModel } from "../models/toast";
-import type { Experiment, PatientNode, WorkflowStep } from "../types";
+import type { DatasetItem, Experiment, PatientNode, WorkflowStep } from "../types";
 import styles from "./ExperimentPage.module.css";
 
-export function ExperimentPage({ experiment }: { experiment: Experiment }) {
+export function ExperimentPage({
+  experiment,
+  datasets,
+}: {
+  experiment: Experiment;
+  datasets: DatasetItem[];
+}) {
   const { showToast } = useAppShell();
   const [selectedDataset, setSelectedDataset] = useState(experiment.dataset);
   const [selectedPatient, setSelectedPatient] = useState<PatientNode | null>(null);
@@ -39,11 +44,23 @@ export function ExperimentPage({ experiment }: { experiment: Experiment }) {
   const patientClass = `${styles.flowNode} ${styles.patientNode}`;
   const nodes: Node[] = useMemo(
     () => [
-      { id: patients[0].id, position: { x: 280, y: 20 }, data: { label: patients[0].id, patient: patients[0] }, type: "input", className: patientClass },
+      {
+        id: patients[0].id,
+        position: { x: 280, y: 20 },
+        data: { label: patients[0].id, patient: patients[0] },
+        type: "input",
+        className: patientClass,
+      },
       { id: patients[1].id, position: { x: 80, y: 140 }, data: { label: patients[1].id, patient: patients[1] }, className: patientClass },
       { id: patients[2].id, position: { x: 280, y: 140 }, data: { label: patients[2].id, patient: patients[2] }, className: patientClass },
       { id: patients[3].id, position: { x: 480, y: 140 }, data: { label: patients[3].id, patient: patients[3] }, className: patientClass },
-      { id: patients[4].id, position: { x: 280, y: 280 }, data: { label: patients[4].id, patient: patients[4] }, type: "output", className: patientClass },
+      {
+        id: patients[4].id,
+        position: { x: 280, y: 280 },
+        data: { label: patients[4].id, patient: patients[4] },
+        type: "output",
+        className: patientClass,
+      },
     ],
     [patientClass, patients],
   );
@@ -60,15 +77,22 @@ export function ExperimentPage({ experiment }: { experiment: Experiment }) {
     [patients],
   );
 
-  const workflowSteps = data.workflowSteps as WorkflowStep[];
+  const steps: WorkflowStep[] = [
+    {
+      id: "preprocessing",
+      label: "Pre-processing",
+      status: "Pending",
+      detail: "Waiting for pipeline status from the API.",
+    },
+  ];
 
   const handleDatasetChange = (value: string) => {
     setSelectedDataset(value);
     showToast(
       new ToastModel({
-        title: "Dataset updated",
-        description: `Experiment ${experiment.name} now uses ${value}.`,
-        status: "success",
+        title: "Dataset selection updated locally",
+        description: `UI link set to ${value}. Experiment↔dataset linking is not in the API yet.`,
+        status: "info",
       }),
     );
   };
@@ -81,7 +105,8 @@ export function ExperimentPage({ experiment }: { experiment: Experiment }) {
             <label>
               Linked dataset
               <select value={selectedDataset} onChange={(event) => handleDatasetChange(event.target.value)}>
-                {data.datasets.map((dataset) => (
+                {datasets.length === 0 ? <option value="">No datasets uploaded</option> : null}
+                {datasets.map((dataset) => (
                   <option key={dataset.id} value={dataset.name}>
                     {dataset.name}
                   </option>
@@ -89,9 +114,18 @@ export function ExperimentPage({ experiment }: { experiment: Experiment }) {
               </select>
             </label>
             <div className={styles.metaGrid}>
-              <span><b>Experiment ID</b>{experiment.id}</span>
-              <span><b>Last updated</b>{new Date(experiment.updatedAt).toLocaleString()}</span>
-              <span><b>Status</b>{experiment.status}</span>
+              <span>
+                <b>Experiment ID</b>
+                {experiment.id}
+              </span>
+              <span>
+                <b>Last updated</b>
+                {new Date(experiment.updatedAt).toLocaleString()}
+              </span>
+              <span>
+                <b>Status</b>
+                {experiment.status}
+              </span>
             </div>
           </div>
         </Panel>
@@ -119,11 +153,26 @@ export function ExperimentPage({ experiment }: { experiment: Experiment }) {
             <Panel title="Selected twin">
               {selectedPatient ? (
                 <div className={styles.detailList}>
-                  <div><dt>Patient</dt><dd>{selectedPatient.id}</dd></div>
-                  <div><dt>Cohort</dt><dd>{selectedPatient.cohort}</dd></div>
-                  <div><dt>Training weight</dt><dd>{Math.round(selectedPatient.trainingWeight * 100)}%</dd></div>
-                  <div><dt>Risk signal</dt><dd>{selectedPatient.risk}</dd></div>
-                  <div><dt>Focus</dt><dd>{selectedPatient.focus}</dd></div>
+                  <div>
+                    <dt>Patient</dt>
+                    <dd>{selectedPatient.id}</dd>
+                  </div>
+                  <div>
+                    <dt>Cohort</dt>
+                    <dd>{selectedPatient.cohort}</dd>
+                  </div>
+                  <div>
+                    <dt>Training weight</dt>
+                    <dd>{Math.round(selectedPatient.trainingWeight * 100)}%</dd>
+                  </div>
+                  <div>
+                    <dt>Risk signal</dt>
+                    <dd>{selectedPatient.risk}</dd>
+                  </div>
+                  <div>
+                    <dt>Focus</dt>
+                    <dd>{selectedPatient.focus}</dd>
+                  </div>
                 </div>
               ) : (
                 <p className={ui.muted}>Select a node in the digital twin graph to inspect training details.</p>
@@ -135,10 +184,14 @@ export function ExperimentPage({ experiment }: { experiment: Experiment }) {
 
       <Section title="Workflow">
         <div className={`${ui.grid} ${ui.two}`}>
-          {workflowSteps.map((step) => (
+          {steps.map((step) => (
             <Panel key={step.id} title={step.label} meta={step.status}>
               <p className={ui.muted}>{step.detail}</p>
-              <ProgressBar value={step.status === "Complete" ? 100 : step.status === "Running" ? 62 : step.status === "Review" ? 48 : 18} />
+              <ProgressBar
+                value={
+                  step.status === "Complete" ? 100 : step.status === "Running" ? 62 : step.status === "Review" ? 48 : 18
+                }
+              />
             </Panel>
           ))}
         </div>

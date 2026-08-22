@@ -42,61 +42,50 @@ function OmicsLayerSection({ layerKey, layer }: { layerKey: OmicsLayerKey; layer
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showModal, showToast } = useAppShell();
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    showToast(
-      new ToastModel({
-        title: "Upload received",
-        description: `${file.name} queued for ${layer.label} matrix validation.`,
-        status: "success",
-      }),
-    );
-    event.target.value = "";
-  };
-
-  const handleVisualise = () => {
-    showModal(
-      new InputModalModel({
-        title: `${layer.label} visualisation`,
-        description: "Choose a chart title for the generated visualisation request.",
-        label: "Chart title",
-        defaultValue: `${layer.label} heatmap preview`,
-        onOk: (value) => {
-          showToast(
-            new ToastModel({
-              title: "Visualisation queued",
-              description: `"${value}" will be sent to the visualisation API when connected.`,
-              status: "info",
-            }),
-          );
-        },
-      }),
-    );
-  };
-
   return (
     <Section title={layer.label}>
       <div className={styles.layerGrid}>
-        <Panel title="Upload" meta="Matrix file">
-          <p className={ui.muted}>Upload a matrix file for {layer.label.toLowerCase()} analysis.</p>
-          <input ref={fileInputRef} type="file" accept=".csv,.tsv,.txt,.xlsx" hidden onChange={handleFileSelected} />
-          <button className={ui.primaryAction} type="button" onClick={handleUploadClick}>
-            Upload matrix
+        <Panel title="Preview matrix" meta="Mock preview">
+          <p className={ui.muted}>
+            Layer previews remain illustrative until matrix-read APIs are available. Dataset metadata comes from the
+            WA1 API.
+          </p>
+          <input ref={fileInputRef} type="file" accept=".csv,.tsv,.txt,.xlsx" hidden />
+          <button
+            className={ui.primaryAction}
+            type="button"
+            onClick={() => {
+              showToast(
+                new ToastModel({
+                  title: "Preview only",
+                  description: `Matrix preview for ${layer.label} is not API-backed yet.`,
+                  status: "info",
+                }),
+              );
+            }}
+          >
+            Preview hint
           </button>
         </Panel>
 
         <Panel title="Matrix Information" meta={layer.matrix.format}>
           <div className={styles.matrixInfo}>
-            <span><b>Rows</b>{layer.matrix.rows.toLocaleString()}</span>
-            <span><b>Columns</b>{layer.matrix.columns.toLocaleString()}</span>
-            <span><b>Missing</b>{layer.matrix.missing}</span>
-            <span><b>Format</b>{layer.matrix.format}</span>
+            <span>
+              <b>Rows</b>
+              {layer.matrix.rows.toLocaleString()}
+            </span>
+            <span>
+              <b>Columns</b>
+              {layer.matrix.columns.toLocaleString()}
+            </span>
+            <span>
+              <b>Missing</b>
+              {layer.matrix.missing}
+            </span>
+            <span>
+              <b>Format</b>
+              {layer.matrix.format}
+            </span>
           </div>
         </Panel>
 
@@ -115,7 +104,29 @@ function OmicsLayerSection({ layerKey, layer }: { layerKey: OmicsLayerKey; layer
 
         <Panel title="Visualisation" meta="Preview">
           <MiniHeatmap variant={heatmapVariant[layerKey]} />
-          <button className={`${ui.button} ${styles.visualiseButton}`} type="button" onClick={handleVisualise}>
+          <button
+            className={`${ui.button} ${styles.visualiseButton}`}
+            type="button"
+            onClick={() => {
+              showModal(
+                new InputModalModel({
+                  title: `${layer.label} visualisation`,
+                  description: "Choose a chart title for a future visualisation request.",
+                  label: "Chart title",
+                  defaultValue: `${layer.label} heatmap preview`,
+                  onOk: (value) => {
+                    showToast(
+                      new ToastModel({
+                        title: "Visualisation queued",
+                        description: `"${value}" is not connected to an API yet.`,
+                        status: "info",
+                      }),
+                    );
+                  },
+                }),
+              );
+            }}
+          >
             Generate visualisation
           </button>
         </Panel>
@@ -132,10 +143,18 @@ export function DatasetsPage({ dataset }: { dataset: DatasetItem }) {
       <Section title="Selected dataset">
         <Panel title={dataset.name} meta={dataset.type}>
           <div className={styles.datasetStats}>
-            <span><b>{dataset.samples.toLocaleString()}</b>samples</span>
-            <span><b>{dataset.features.toLocaleString()}</b>features</span>
-            <span><b>{dataset.quality}%</b>quality</span>
-            <span><b>{dataset.updated}</b>updated</span>
+            <span>
+              <b>{dataset.samples.toLocaleString()}</b>samples
+            </span>
+            <span>
+              <b>{dataset.features.toLocaleString()}</b>features
+            </span>
+            <span>
+              <b>{dataset.quality}%</b>quality
+            </span>
+            <span>
+              <b>{dataset.updated}</b>updated
+            </span>
           </div>
         </Panel>
       </Section>
