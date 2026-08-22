@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 
+const upstream =
+  process.env.API_UPSTREAM_URL?.replace(/\/$/, "") ??
+  "https://rg24-rg1-wa1-api.azurewebsites.net";
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${upstream}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
