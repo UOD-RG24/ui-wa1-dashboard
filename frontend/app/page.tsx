@@ -18,10 +18,10 @@ import {
 import { ApiError } from "./lib/apiClient";
 import type { ApiDataset, ApiExperiment, ApiUser } from "./lib/apiTypes";
 import { clearAuthSession } from "./lib/authStorage";
-import { mapDataset, mapExperiment } from "./lib/mappers";
+import { mapDataset, mapExperiment, mapExperimentWorkflow } from "./lib/mappers";
 import { InputModalModel } from "./models/modal";
 import { ToastModel } from "./models/toast";
-import type { DatasetItem, Experiment, MainView } from "./types";
+import type { DatasetItem, Experiment, MainView, WorkflowStep } from "./types";
 import { DatasetsPage } from "./views/DatasetsPage";
 import { ExperimentPage } from "./views/ExperimentPage";
 import { ProfilePage } from "./views/ProfilePage";
@@ -44,6 +44,7 @@ function DashboardHome({ user }: { user: ApiUser }) {
   const [apiExperiments, setApiExperiments] = useState<ApiExperiment[]>([]);
   const [selectedExperimentId, setSelectedExperimentId] = useState("");
   const [selectedDatasetId, setSelectedDatasetId] = useState("");
+  const [workflowByExperiment, setWorkflowByExperiment] = useState<Record<string, WorkflowStep[]>>({});
 
   const datasets = useMemo(() => sortDatasets(apiDatasets.map(mapDataset)), [apiDatasets]);
   const experiments = useMemo(() => sortExperiments(apiExperiments.map(mapExperiment)), [apiExperiments]);
@@ -65,6 +66,11 @@ function DashboardHome({ user }: { user: ApiUser }) {
     const [datasetRows, experimentRows] = await Promise.all([listDatasets(), listExperiments()]);
     setApiDatasets(datasetRows);
     setApiExperiments(experimentRows);
+    const workflows: Record<string, WorkflowStep[]> = {};
+    for (const row of experimentRows) {
+      workflows[row.id] = mapExperimentWorkflow(row);
+    }
+    setWorkflowByExperiment(workflows);
     setSelectedDatasetId((current) =>
       current && datasetRows.some((item) => item.id === current) ? current : datasetRows[0]?.id ?? "",
     );
@@ -330,7 +336,11 @@ function DashboardHome({ user }: { user: ApiUser }) {
       onCreateDataset={handleCreateDataset}
     >
       {mainView === "experiment" && selectedExperiment ? (
-        <ExperimentPage experiment={selectedExperiment} datasets={datasets} />
+        <ExperimentPage
+          experiment={selectedExperiment}
+          datasets={datasets}
+          workflowSteps={workflowByExperiment[selectedExperiment.id]}
+        />
       ) : null}
       {mainView === "dataset" && selectedDataset ? (
         <DatasetsPage

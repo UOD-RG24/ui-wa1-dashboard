@@ -22,9 +22,11 @@ import styles from "./ExperimentPage.module.css";
 export function ExperimentPage({
   experiment,
   datasets,
+  workflowSteps,
 }: {
   experiment: Experiment;
   datasets: DatasetItem[];
+  workflowSteps?: WorkflowStep[];
 }) {
   const { showToast } = useAppShell();
   const [selectedDataset, setSelectedDataset] = useState(experiment.dataset);
@@ -77,14 +79,16 @@ export function ExperimentPage({
     [patients],
   );
 
-  const steps: WorkflowStep[] = [
-    {
-      id: "preprocessing",
-      label: "Pre-processing",
-      status: "Pending",
-      detail: "Waiting for pipeline status from the API.",
-    },
-  ];
+  const steps =
+    workflowSteps ??
+    ([
+      {
+        id: "preprocessing",
+        label: "Pre-processing",
+        status: "Pending",
+        detail: "Waiting for pipeline status from the API.",
+      },
+    ] as WorkflowStep[]);
 
   const handleDatasetChange = (value: string) => {
     setSelectedDataset(value);
