@@ -19,6 +19,8 @@ export function DashboardShell({
   onSelectDataset,
   onSelectProfile,
   onSignOut,
+  onCreateExperiment,
+  onCreateDataset,
   children,
 }: {
   mainView: MainView;
@@ -32,6 +34,8 @@ export function DashboardShell({
   onSelectDataset: (id: string) => void;
   onSelectProfile: () => void;
   onSignOut: () => void;
+  onCreateExperiment?: () => void;
+  onCreateDataset?: () => void;
   children: React.ReactNode;
 }) {
   const activeExperiment = experiments.find((item) => item.id === selectedExperimentId) ?? experiments[0];
@@ -60,6 +64,11 @@ export function DashboardShell({
               <FiActivity aria-hidden="true" />
               Experiments
             </p>
+          ) : null}
+          {!isCollapsed && onCreateExperiment ? (
+            <button className={styles.sidebarAction} type="button" onClick={onCreateExperiment}>
+              New experiment
+            </button>
           ) : null}
           <nav className={styles.navList} aria-label="Experiments">
             {experiments.length === 0 && !isCollapsed ? (
@@ -92,6 +101,11 @@ export function DashboardShell({
               <FiDatabase aria-hidden="true" />
               Datasets
             </p>
+          ) : null}
+          {!isCollapsed && onCreateDataset ? (
+            <button className={styles.sidebarAction} type="button" onClick={onCreateDataset}>
+              Upload dataset
+            </button>
           ) : null}
           <nav className={styles.navList} aria-label="Datasets">
             {datasets.length === 0 && !isCollapsed ? (

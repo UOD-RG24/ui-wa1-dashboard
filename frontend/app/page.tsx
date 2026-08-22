@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { AuthGate } from "./components/auth/AuthGate";
 import { DashboardShell } from "./components/dashboard/DashboardShell";
 import { useAppShell } from "./components/providers/AppProviders";
-import { listDatasets, listExperiments, signOut } from "./lib/api";
+import { createDataset, listDatasets, listExperiments, signOut } from "./lib/api";
 import { ApiError } from "./lib/apiClient";
 import type { ApiDataset, ApiExperiment, ApiUser } from "./lib/apiTypes";
 import { clearAuthSession } from "./lib/authStorage";
 import { mapDataset, mapExperiment } from "./lib/mappers";
+import { InputModalModel } from "./models/modal";
 import { ToastModel } from "./models/toast";
 import type { DatasetItem, Experiment, MainView } from "./types";
 import { DatasetsPage } from "./views/DatasetsPage";
@@ -26,7 +27,7 @@ function sortDatasets(items: DatasetItem[]) {
 
 function DashboardHome({ user }: { user: ApiUser }) {
   const router = useRouter();
-  const { showToast } = useAppShell();
+  const { showToast, showModal } = useAppShell();
   const [mainView, setMainView] = useState<MainView>("experiment");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -102,6 +103,55 @@ function DashboardHome({ user }: { user: ApiUser }) {
     }
   };
 
+  const handleCreateDataset = () => {
+    showModal(
+      new InputModalModel({
+        title: "Upload dataset",
+        description: "Choose a CSV/TSV file, then provide a name and omics type.",
+        label: "Dataset name",
+        defaultValue: "New dataset",
+        onOk: (name) => {
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = ".csv,.tsv,.txt";
+          input.onchange = () => {
+            const file = input.files?.[0];
+            if (!file) return;
+            void (async () => {
+              try {
+                const form = new FormData();
+                form.append("Name", name.trim() || file.name);
+                form.append("Description", "");
+                form.append("OmicsType", "transcriptomics");
+                form.append("File", file);
+                const created = await createDataset(form);
+                await refreshLists();
+                setSelectedDatasetId(created.id);
+                setMainView("dataset");
+                showToast(
+                  new ToastModel({
+                    title: "Dataset uploaded",
+                    description: created.name,
+                    status: "success",
+                  }),
+                );
+              } catch (error) {
+                showToast(
+                  new ToastModel({
+                    title: "Upload failed",
+                    description: error instanceof ApiError ? error.message : "Could not upload dataset.",
+                    status: "error",
+                  }),
+                );
+              }
+            })();
+          };
+          input.click();
+        },
+      }),
+    );
+  };
+
   if (loading) {
     return (
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
@@ -131,6 +181,7 @@ function DashboardHome({ user }: { user: ApiUser }) {
       onSignOut={() => {
         void handleSignOut();
       }}
+      onCreateDataset={handleCreateDataset}
     >
       {mainView === "experiment" && selectedExperiment ? (
         <ExperimentPage experiment={selectedExperiment} datasets={datasets} />
