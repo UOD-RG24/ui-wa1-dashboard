@@ -2,15 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { AuthGate } from "./components/auth/AuthGate";
 import { DashboardShell, datasets, experiments } from "./components/dashboard/DashboardShell";
 import { useAppShell } from "./components/providers/AppProviders";
+import { signOut } from "./lib/api";
+import { clearAuthSession } from "./lib/authStorage";
 import { ToastModel } from "./models/toast";
 import type { MainView } from "./types";
 import { DatasetsPage } from "./views/DatasetsPage";
 import { ExperimentPage } from "./views/ExperimentPage";
 import { ProfilePage } from "./views/ProfilePage";
 
-export default function Home() {
+function DashboardHome() {
   const router = useRouter();
   const { showToast } = useAppShell();
   const [mainView, setMainView] = useState<MainView>("experiment");
@@ -28,15 +31,22 @@ export default function Home() {
     [selectedDatasetId],
   );
 
-  const handleSignOut = () => {
-    showToast(
-      new ToastModel({
-        title: "Signed out",
-        description: "You have been redirected to the sign-in page.",
-        status: "info",
-      }),
-    );
-    router.push("/login");
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch {
+      // Always clear local session.
+    } finally {
+      clearAuthSession();
+      showToast(
+        new ToastModel({
+          title: "Signed out",
+          description: "You have been redirected to the sign-in page.",
+          status: "info",
+        }),
+      );
+      router.replace("/login");
+    }
   };
 
   return (
@@ -55,11 +65,17 @@ export default function Home() {
         setMainView("dataset");
       }}
       onSelectProfile={() => setMainView("profile")}
-      onSignOut={handleSignOut}
+      onSignOut={() => {
+        void handleSignOut();
+      }}
     >
       {mainView === "experiment" && selectedExperiment ? <ExperimentPage experiment={selectedExperiment} /> : null}
       {mainView === "dataset" && selectedDataset ? <DatasetsPage dataset={selectedDataset} /> : null}
       {mainView === "profile" ? <ProfilePage /> : null}
     </DashboardShell>
   );
+}
+
+export default function Home() {
+  return <AuthGate>{() => <DashboardHome />}</AuthGate>;
 }

@@ -195,6 +195,35 @@
   color: var(--login-blue);
 }
 
+.ssoButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.errorText {
+  margin: 0;
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.linkButton {
+  border: 0;
+  background: transparent;
+  color: var(--login-blue);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.linkButton:hover {
+  text-decoration: underline;
+}
+
 .panelFooter {
   border-top: 1px solid var(--line);
   background: var(--surface-subtle);
