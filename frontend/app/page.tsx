@@ -7,6 +7,7 @@ import { DashboardShell } from "./components/dashboard/DashboardShell";
 import { useAppShell } from "./components/providers/AppProviders";
 import {
   createDataset,
+  createExperiment,
   deleteDataset,
   downloadDataset,
   listDatasets,
@@ -113,6 +114,42 @@ function DashboardHome({ user }: { user: ApiUser }) {
       );
       router.replace("/login");
     }
+  };
+
+  const handleCreateExperiment = () => {
+    showModal(
+      new InputModalModel({
+        title: "Create experiment",
+        description: "Enter a name for the new experiment.",
+        label: "Experiment name",
+        defaultValue: "New experiment",
+        onOk: (value) => {
+          void (async () => {
+            try {
+              const created = await createExperiment({ name: value.trim() || "New experiment" });
+              await refreshLists();
+              setSelectedExperimentId(created.id);
+              setMainView("experiment");
+              showToast(
+                new ToastModel({
+                  title: "Experiment created",
+                  description: created.name,
+                  status: "success",
+                }),
+              );
+            } catch (error) {
+              showToast(
+                new ToastModel({
+                  title: "Create failed",
+                  description: error instanceof ApiError ? error.message : "Could not create experiment.",
+                  status: "error",
+                }),
+              );
+            }
+          })();
+        },
+      }),
+    );
   };
 
   const handleCreateDataset = () => {
@@ -289,6 +326,7 @@ function DashboardHome({ user }: { user: ApiUser }) {
       onSignOut={() => {
         void handleSignOut();
       }}
+      onCreateExperiment={handleCreateExperiment}
       onCreateDataset={handleCreateDataset}
     >
       {mainView === "experiment" && selectedExperiment ? (
