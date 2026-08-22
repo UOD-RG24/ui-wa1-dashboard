@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { AuthGate } from "./components/auth/AuthGate";
 import { DashboardShell } from "./components/dashboard/DashboardShell";
 import { useAppShell } from "./components/providers/AppProviders";
-import { createDataset, listDatasets, listExperiments, signOut } from "./lib/api";
+import {
+  createDataset,
+  deleteDataset,
+  downloadDataset,
+  listDatasets,
+  listExperiments,
+  signOut,
+  updateDataset,
+} from "./lib/api";
 import { ApiError } from "./lib/apiClient";
 import type { ApiDataset, ApiExperiment, ApiUser } from "./lib/apiTypes";
 import { clearAuthSession } from "./lib/authStorage";
@@ -46,6 +54,10 @@ function DashboardHome({ user }: { user: ApiUser }) {
   const selectedDataset = useMemo(
     () => datasets.find((item) => item.id === selectedDatasetId) ?? datasets[0],
     [datasets, selectedDatasetId],
+  );
+  const selectedApiDataset = useMemo(
+    () => apiDatasets.find((item) => item.id === selectedDatasetId) ?? apiDatasets[0],
+    [apiDatasets, selectedDatasetId],
   );
 
   const refreshLists = useCallback(async () => {
@@ -152,6 +164,102 @@ function DashboardHome({ user }: { user: ApiUser }) {
     );
   };
 
+  const handleUpdateDataset = () => {
+    if (!selectedApiDataset) return;
+    showModal(
+      new InputModalModel({
+        title: "Rename dataset",
+        description: "Update the dataset display name.",
+        label: "Name",
+        defaultValue: selectedApiDataset.name,
+        onOk: (value) => {
+          void (async () => {
+            try {
+              await updateDataset(selectedApiDataset.id, { name: value.trim() || selectedApiDataset.name });
+              await refreshLists();
+              showToast(new ToastModel({ title: "Dataset updated", description: value, status: "success" }));
+            } catch (error) {
+              showToast(
+                new ToastModel({
+                  title: "Update failed",
+                  description: error instanceof ApiError ? error.message : "Could not update dataset.",
+                  status: "error",
+                }),
+              );
+            }
+          })();
+        },
+      }),
+    );
+  };
+
+  const handleDownloadDataset = async () => {
+    if (!selectedApiDataset) return;
+    try {
+      const blob = await downloadDataset(selectedApiDataset.id);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = selectedApiDataset.originalFileName || `${selectedApiDataset.name}.csv`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      showToast(
+        new ToastModel({
+          title: "Download failed",
+          description: error instanceof ApiError ? error.message : "Could not download dataset.",
+          status: "error",
+        }),
+      );
+    }
+  };
+
+  const handleDeleteDataset = () => {
+    if (!selectedApiDataset) return;
+    showModal(
+      new InputModalModel({
+        title: "Delete dataset",
+        description: `Type DELETE to remove "${selectedApiDataset.name}".`,
+        label: "Confirmation",
+        defaultValue: "",
+        onOk: (value) => {
+          if (value.trim().toUpperCase() !== "DELETE") {
+            showToast(
+              new ToastModel({
+                title: "Delete cancelled",
+                description: "You must type DELETE to confirm.",
+                status: "warning",
+              }),
+            );
+            return;
+          }
+          void (async () => {
+            try {
+              await deleteDataset(selectedApiDataset.id);
+              await refreshLists();
+              setMainView("dataset");
+              showToast(
+                new ToastModel({
+                  title: "Dataset deleted",
+                  description: selectedApiDataset.name,
+                  status: "success",
+                }),
+              );
+            } catch (error) {
+              showToast(
+                new ToastModel({
+                  title: "Delete failed",
+                  description: error instanceof ApiError ? error.message : "Could not delete dataset.",
+                  status: "error",
+                }),
+              );
+            }
+          })();
+        },
+      }),
+    );
+  };
+
   if (loading) {
     return (
       <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
@@ -186,7 +294,16 @@ function DashboardHome({ user }: { user: ApiUser }) {
       {mainView === "experiment" && selectedExperiment ? (
         <ExperimentPage experiment={selectedExperiment} datasets={datasets} />
       ) : null}
-      {mainView === "dataset" && selectedDataset ? <DatasetsPage dataset={selectedDataset} /> : null}
+      {mainView === "dataset" && selectedDataset ? (
+        <DatasetsPage
+          dataset={selectedDataset}
+          onRename={handleUpdateDataset}
+          onDownload={() => {
+            void handleDownloadDataset();
+          }}
+          onDelete={handleDeleteDataset}
+        />
+      ) : null}
       {mainView === "profile" ? <ProfilePage user={user} /> : null}
     </DashboardShell>
   );

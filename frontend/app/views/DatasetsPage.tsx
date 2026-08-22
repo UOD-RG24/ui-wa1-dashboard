@@ -47,8 +47,8 @@ function OmicsLayerSection({ layerKey, layer }: { layerKey: OmicsLayerKey; layer
       <div className={styles.layerGrid}>
         <Panel title="Preview matrix" meta="Mock preview">
           <p className={ui.muted}>
-            Layer previews remain illustrative until matrix-read APIs are available. Dataset metadata comes from the
-            WA1 API.
+            Layer previews remain illustrative until matrix-read APIs are available. Dataset file ops use the actions
+            above.
           </p>
           <input ref={fileInputRef} type="file" accept=".csv,.tsv,.txt,.xlsx" hidden />
           <button
@@ -58,7 +58,7 @@ function OmicsLayerSection({ layerKey, layer }: { layerKey: OmicsLayerKey; layer
               showToast(
                 new ToastModel({
                   title: "Preview only",
-                  description: `Matrix preview for ${layer.label} is not API-backed yet.`,
+                  description: `Use Upload dataset in the sidebar to create API-backed ${layer.label} files.`,
                   status: "info",
                 }),
               );
@@ -135,7 +135,17 @@ function OmicsLayerSection({ layerKey, layer }: { layerKey: OmicsLayerKey; layer
   );
 }
 
-export function DatasetsPage({ dataset }: { dataset: DatasetItem }) {
+export function DatasetsPage({
+  dataset,
+  onRename,
+  onDownload,
+  onDelete,
+}: {
+  dataset: DatasetItem;
+  onRename?: () => void;
+  onDownload?: () => void;
+  onDelete?: () => void;
+}) {
   const omicsLayers = data.omicsLayers as Record<OmicsLayerKey, OmicsLayer>;
 
   return (
@@ -155,6 +165,23 @@ export function DatasetsPage({ dataset }: { dataset: DatasetItem }) {
             <span>
               <b>{dataset.updated}</b>updated
             </span>
+          </div>
+          <div className={styles.datasetActions}>
+            {onRename ? (
+              <button className={ui.button} type="button" onClick={onRename}>
+                Rename
+              </button>
+            ) : null}
+            {onDownload ? (
+              <button className={ui.button} type="button" onClick={onDownload}>
+                Download
+              </button>
+            ) : null}
+            {onDelete ? (
+              <button className={ui.button} type="button" onClick={onDelete}>
+                Delete
+              </button>
+            ) : null}
           </div>
         </Panel>
       </Section>
