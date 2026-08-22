@@ -6,6 +6,7 @@ import { AuthGate } from "./components/auth/AuthGate";
 import { DashboardShell, datasets, experiments } from "./components/dashboard/DashboardShell";
 import { useAppShell } from "./components/providers/AppProviders";
 import { signOut } from "./lib/api";
+import type { ApiUser } from "./lib/apiTypes";
 import { clearAuthSession } from "./lib/authStorage";
 import { ToastModel } from "./models/toast";
 import type { MainView } from "./types";
@@ -13,7 +14,7 @@ import { DatasetsPage } from "./views/DatasetsPage";
 import { ExperimentPage } from "./views/ExperimentPage";
 import { ProfilePage } from "./views/ProfilePage";
 
-function DashboardHome() {
+function DashboardHome({ user }: { user: ApiUser }) {
   const router = useRouter();
   const { showToast } = useAppShell();
   const [mainView, setMainView] = useState<MainView>("experiment");
@@ -71,11 +72,11 @@ function DashboardHome() {
     >
       {mainView === "experiment" && selectedExperiment ? <ExperimentPage experiment={selectedExperiment} /> : null}
       {mainView === "dataset" && selectedDataset ? <DatasetsPage dataset={selectedDataset} /> : null}
-      {mainView === "profile" ? <ProfilePage /> : null}
+      {mainView === "profile" ? <ProfilePage user={user} /> : null}
     </DashboardShell>
   );
 }
 
 export default function Home() {
-  return <AuthGate>{() => <DashboardHome />}</AuthGate>;
+  return <AuthGate>{(user) => <DashboardHome user={user} />}</AuthGate>;
 }

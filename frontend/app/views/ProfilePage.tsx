@@ -2,6 +2,7 @@
 
 import data from "../data/dashboard.json";
 import { useAppShell } from "../components/providers/AppProviders";
+import type { ApiUser } from "../lib/apiTypes";
 import { ConfirmModalModel } from "../models/modal";
 import { ToastModel } from "../models/toast";
 import { DataTable } from "../components/ui/DataTable";
@@ -10,20 +11,21 @@ import { Section } from "../components/ui/Section";
 import ui from "../components/ui/Ui.module.css";
 import styles from "./ProfilePage.module.css";
 
-export function ProfilePage() {
+export function ProfilePage({ user }: { user: ApiUser }) {
   const { showModal, showToast } = useAppShell();
-  const profile = data.profile;
+  const displayName = `${user.firstName} ${user.lastName}`.trim() || user.email;
 
   const handleDelete = () => {
     showModal(
       new ConfirmModalModel({
         title: "Delete profile",
-        description: "This will permanently remove your profile and activity history from this workspace. This action cannot be undone.",
+        description:
+          "This will permanently remove your profile and activity history from this workspace. This action cannot be undone.",
         onYes: () => {
           showToast(
             new ToastModel({
               title: "Delete requested",
-              description: "Profile deletion would be processed once authentication is connected.",
+              description: "Profile deletion is not available from the API yet.",
               status: "warning",
             }),
           );
@@ -35,12 +37,24 @@ export function ProfilePage() {
   return (
     <>
       <Section title="Profile Details">
-        <Panel title={profile.name} meta={profile.role}>
+        <Panel title={displayName} meta={user.role}>
           <div className={styles.profileGrid}>
-            <div><dt>Name</dt><dd>{profile.name}</dd></div>
-            <div><dt>Email</dt><dd>{profile.email}</dd></div>
-            <div><dt>Role</dt><dd>{profile.role}</dd></div>
-            <div><dt>Workspace</dt><dd>{profile.workspace}</dd></div>
+            <div>
+              <dt>Name</dt>
+              <dd>{displayName}</dd>
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd>{user.email}</dd>
+            </div>
+            <div>
+              <dt>Role</dt>
+              <dd>{user.role}</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>{user.status}</dd>
+            </div>
           </div>
         </Panel>
       </Section>
@@ -48,7 +62,7 @@ export function ProfilePage() {
       <Section title="Activity Log">
         <Panel title="Recent activity" meta={`${data.activityLog.length} entries`}>
           <DataTable
-            rows={data.activityLog}
+            rows={data.activityLog as Array<Record<string, unknown>>}
             columns={["time", "agent", "action", "input", "output", "duration"]}
           />
         </Panel>
@@ -57,7 +71,8 @@ export function ProfilePage() {
       <Section title="Delete">
         <Panel title="Account removal">
           <p className={ui.muted}>
-            Remove your profile and associated activity from this workspace. You will need to sign in again to regain access.
+            Remove your profile and associated activity from this workspace. You will need to sign in again to regain
+            access.
           </p>
           <button className={styles.deleteButton} type="button" onClick={handleDelete}>
             Delete profile
