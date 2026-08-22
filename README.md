@@ -5,6 +5,7 @@ Next.js frontend and NestJS stub backend for the RG24 WA1 workspace.
 ## Docs
 
 - [Authentication](./docs/AUTH.md) — JWT setup and how teammates sign in
+- [API integration](./docs/INTEGRATION.md) — datasets, experiments, and proxy wiring
 
 ## Frontend
 
