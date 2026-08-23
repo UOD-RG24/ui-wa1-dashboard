@@ -5,6 +5,7 @@ import { useAppShell } from "../components/providers/AppProviders";
 import type { ApiUser } from "../lib/apiTypes";
 import { ConfirmModalModel } from "../models/modal";
 import { ToastModel } from "../models/toast";
+import { PageShell } from "../components/dashboard/PageShell";
 import { DataTable } from "../components/ui/DataTable";
 import { Panel } from "../components/ui/Panel";
 import { Section } from "../components/ui/Section";
@@ -35,7 +36,7 @@ export function ProfilePage({ user }: { user: ApiUser }) {
   };
 
   return (
-    <>
+    <PageShell category="Account" title={displayName}>
       <Section title="Profile Details">
         <Panel title={displayName} meta={user.role}>
           <div className={styles.profileGrid}>
@@ -79,6 +80,6 @@ export function ProfilePage({ user }: { user: ApiUser }) {
           </button>
         </Panel>
       </Section>
-    </>
+    </PageShell>
   );
 }

@@ -1,6 +1,6 @@
 .selectionRow {
   display: grid;
-  gap: 16px;
+  gap: calc(16px * var(--ui-scale));
 }
 
 .selectionRow label {
@@ -10,30 +10,31 @@
 .metaGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: calc(12px * var(--ui-scale));
 }
 
 .metaGrid span {
   display: grid;
   gap: 4px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: var(--surface-subtle);
-  padding: 10px 12px;
-  font-size: 13px;
+  padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  font-size: calc(13px * var(--ui-scale));
 }
 
 .metaGrid b {
   color: var(--muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-scale));
   font-weight: 750;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
 .twinLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
+  gap: calc(18px * var(--ui-scale));
   align-items: stretch;
 }
 
@@ -42,8 +43,9 @@
   min-height: 420px;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   background: var(--surface-subtle);
+  box-shadow: var(--shadow-soft);
 }
 
 .twinAside {
@@ -55,7 +57,7 @@
   gap: 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -63,7 +65,7 @@
   display: grid;
   gap: 3px;
   border-bottom: 1px solid var(--line);
-  padding: 11px 13px;
+  padding: calc(11px * var(--ui-scale)) calc(13px * var(--ui-scale));
 }
 
 .detailList div:last-child {
@@ -72,7 +74,7 @@
 
 .detailList dt {
   color: var(--muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-scale));
   font-weight: 750;
   text-transform: capitalize;
 }
@@ -80,25 +82,25 @@
 .detailList dd {
   margin: 0;
   color: var(--foreground);
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-scale));
   font-weight: 750;
 }
 
 .flowNode {
   min-width: 144px !important;
   border: 1px solid var(--line-strong) !important;
-  border-radius: 4px !important;
+  border-radius: var(--radius-sm) !important;
   background: #ffffff !important;
   color: var(--navy) !important;
   padding: 10px 12px !important;
   font-size: 12px;
   font-weight: 800;
-  box-shadow: 0 2px 8px rgba(15, 39, 66, 0.04) !important;
+  box-shadow: var(--shadow-soft) !important;
 }
 
 .patientNode {
   border-color: var(--accent) !important;
-  background: #f6f9fc !important;
+  background: var(--accent-soft) !important;
 }
 
 .flowCanvas :global(.react-flow__attribution) {
@@ -109,7 +111,7 @@
 .flowCanvas :global(.react-flow__controls),
 .flowCanvas :global(.react-flow__minimap) {
   border: 1px solid var(--line) !important;
-  border-radius: 4px !important;
+  border-radius: var(--radius-sm) !important;
   box-shadow: none !important;
 }
 

@@ -11,6 +11,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useAppShell } from "../components/providers/AppProviders";
+import { PageShell } from "../components/dashboard/PageShell";
 import { Panel } from "../components/ui/Panel";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { Section } from "../components/ui/Section";
@@ -102,7 +103,30 @@ export function ExperimentPage({
   };
 
   return (
-    <>
+    <PageShell category="Experiment" title={experiment.name}>
+      <div className={ui.metricStrip}>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Status</p>
+          <p className={ui.metricValue} style={{ fontSize: "calc(20px * var(--ui-scale))" }}>
+            {experiment.status}
+          </p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Linked dataset</p>
+          <p className={ui.metricValue} style={{ fontSize: "calc(18px * var(--ui-scale))" }}>
+            {selectedDataset || "—"}
+          </p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Patients</p>
+          <p className={ui.metricValue}>{patients.length}</p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Workflow steps</p>
+          <p className={ui.metricValue}>{steps.length}</p>
+        </div>
+      </div>
+
       <Section title="Dataset Selection">
         <Panel title={experiment.name} meta={experiment.status}>
           <div className={styles.selectionRow}>
@@ -200,6 +224,6 @@ export function ExperimentPage({
           ))}
         </div>
       </Section>
-    </>
+    </PageShell>
   );
 }

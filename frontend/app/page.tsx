@@ -334,6 +334,7 @@ function DashboardHome({ user }: { user: ApiUser }) {
       }}
       onCreateExperiment={handleCreateExperiment}
       onCreateDataset={handleCreateDataset}
+      userName={`${user.firstName} ${user.lastName}`.trim() || user.email}
     >
       {mainView === "experiment" && selectedExperiment ? (
         <ExperimentPage

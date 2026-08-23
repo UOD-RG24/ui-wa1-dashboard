@@ -1,8 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { FiActivity, FiChevronLeft, FiChevronRight, FiDatabase, FiHardDrive, FiLogOut, FiUser } from "react-icons/fi";
+import { useEffect, useRef, useState } from "react";
+import {
+  FiActivity,
+  FiChevronDown,
+  FiChevronLeft,
+  FiChevronRight,
+  FiDatabase,
+  FiHardDrive,
+  FiLogOut,
+  FiMenu,
+  FiPlus,
+  FiUser,
+  FiX,
+} from "react-icons/fi";
 import type { DatasetItem, Experiment, MainView } from "../../types";
 import derbyLogo from "../../university-of-derby-logo-01.webp";
 import styles from "./DashboardShell.module.css";
@@ -21,6 +33,7 @@ export function DashboardShell({
   onSignOut,
   onCreateExperiment,
   onCreateDataset,
+  userName,
   children,
 }: {
   mainView: MainView;
@@ -36,138 +49,336 @@ export function DashboardShell({
   onSignOut: () => void;
   onCreateExperiment?: () => void;
   onCreateDataset?: () => void;
+  userName?: string;
   children: React.ReactNode;
 }) {
-  const activeExperiment = experiments.find((item) => item.id === selectedExperimentId) ?? experiments[0];
-  const activeDataset = datasets.find((item) => item.id === selectedDatasetId) ?? datasets[0];
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [experimentsOpen, setExperimentsOpen] = useState(true);
+  const [datasetsOpen, setDatasetsOpen] = useState(true);
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const [autoRail, setAutoRail] = useState(false);
+  const avatarRef = useRef<HTMLDivElement>(null);
+
+  const railMode = isCollapsed || autoRail;
+  const displayName = userName?.trim() || "User";
+  const initials = displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 
   const pageTitle =
     mainView === "profile"
       ? "Profile"
       : mainView === "experiment"
-        ? activeExperiment?.name ?? "Experiment"
-        : activeDataset?.name ?? "Dataset";
+        ? experiments.find((item) => item.id === selectedExperimentId)?.name ?? "Experiment"
+        : datasets.find((item) => item.id === selectedDatasetId)?.name ?? "Dataset";
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1280px) and (min-width: 901px)");
+    const sync = () => setAutoRail(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setAvatarMenuOpen(false);
+  }, [mainView, selectedExperimentId, selectedDatasetId]);
+
+  useEffect(() => {
+    if (!avatarMenuOpen) return;
+    const onPointer = (event: MouseEvent) => {
+      if (!avatarRef.current?.contains(event.target as Node)) {
+        setAvatarMenuOpen(false);
+      }
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAvatarMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [avatarMenuOpen]);
+
+  const closeMobile = () => setMobileOpen(false);
+
+  const selectExperiment = (id: string) => {
+    onSelectExperiment(id);
+    closeMobile();
+  };
+
+  const selectDataset = (id: string) => {
+    onSelectDataset(id);
+    closeMobile();
+  };
 
   return (
-    <div className={`${styles.dashboardShell} ${isCollapsed ? styles.sidebarCollapsed : ""}`}>
-      <aside className={`${styles.appSidebar} ${isCollapsed ? styles.collapsed : ""}`}>
-        <div className={styles.sidebarHeader}>
-          <button className={styles.sidebarToggle} onClick={onToggleCollapsed} aria-label="Toggle sidebar">
-            {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+    <div className={`${styles.dashboardShell} ${railMode ? styles.sidebarCollapsed : ""}`}>
+      {mobileOpen ? (
+        <button
+          type="button"
+          className={styles.navBackdrop}
+          aria-label="Close navigation"
+          onClick={closeMobile}
+        />
+      ) : null}
+
+      <aside
+        className={`${styles.appSidebar} ${railMode ? styles.collapsed : ""} ${mobileOpen ? styles.mobileOpen : ""}`}
+      >
+        <button type="button" className={styles.mobileClose} onClick={closeMobile} aria-label="Close menu">
+          <FiX />
+        </button>
+
+        <div className={styles.brandBlock}>
+          <Image
+            src={derbyLogo}
+            alt="University of Derby"
+            className={styles.brandMark}
+            priority
+          />
+          {!railMode ? <span className={styles.brandTitle}>Multi Omics Dashboard</span> : null}
+        </div>
+
+        <button
+          type="button"
+          className={styles.collapseToggle}
+          onClick={onToggleCollapsed}
+          aria-label={railMode ? "Expand navigation" : "Collapse navigation"}
+          data-tooltip={railMode ? "Expand" : undefined}
+        >
+          {railMode ? <FiChevronRight /> : <FiChevronLeft />}
+          {!railMode ? <span>Collapse</span> : null}
+        </button>
+
+        <nav className={styles.navMenu} aria-label="Workspace">
+          <div className={styles.navSection}>
+            <button
+              type="button"
+              className={`${styles.navParent} ${mainView === "experiment" ? styles.parentActive : ""}`}
+              onClick={() => setExperimentsOpen((value) => !value)}
+              aria-expanded={experimentsOpen}
+              data-tooltip={railMode ? "Experiments" : undefined}
+            >
+              <span className={styles.navIcon} aria-hidden="true">
+                <FiActivity />
+              </span>
+              {!railMode ? <span className={styles.navLabel}>Experiments</span> : null}
+              {!railMode ? (
+                <span className={`${styles.navChevron} ${experimentsOpen ? styles.chevronOpen : ""}`}>
+                  <FiChevronDown />
+                </span>
+              ) : null}
+            </button>
+
+            {railMode ? (
+              <div className={styles.flyout}>
+                <p className={styles.flyoutTitle}>Experiments</p>
+                {onCreateExperiment ? (
+                  <button type="button" className={styles.flyoutAction} onClick={onCreateExperiment}>
+                    <FiPlus /> New experiment
+                  </button>
+                ) : null}
+                {experiments.map((experiment) => (
+                  <button
+                    key={experiment.id}
+                    type="button"
+                    className={
+                      mainView === "experiment" && selectedExperimentId === experiment.id ? styles.active : ""
+                    }
+                    onClick={() => selectExperiment(experiment.id)}
+                  >
+                    {experiment.name}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {!railMode && experimentsOpen ? (
+              <div className={styles.submenu}>
+                {onCreateExperiment ? (
+                  <button type="button" className={styles.sidebarAction} onClick={onCreateExperiment}>
+                    <FiPlus aria-hidden="true" />
+                    New experiment
+                  </button>
+                ) : null}
+                {experiments.length === 0 ? <p className={styles.emptyHint}>No experiments yet</p> : null}
+                {experiments.map((experiment) => (
+                  <button
+                    key={experiment.id}
+                    type="button"
+                    className={`${styles.navChild} ${
+                      mainView === "experiment" && selectedExperimentId === experiment.id ? styles.active : ""
+                    }`}
+                    onClick={() => selectExperiment(experiment.id)}
+                    title={experiment.name}
+                  >
+                    <span className={styles.navIconSm} aria-hidden="true">
+                      <FiActivity />
+                    </span>
+                    <span className={styles.itemContent}>
+                      <span className={styles.itemTitle}>{experiment.name}</span>
+                      <span className={styles.itemMeta}>{new Date(experiment.updatedAt).toLocaleDateString()}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <div className={styles.navSection}>
+            <button
+              type="button"
+              className={`${styles.navParent} ${mainView === "dataset" ? styles.parentActive : ""}`}
+              onClick={() => setDatasetsOpen((value) => !value)}
+              aria-expanded={datasetsOpen}
+              data-tooltip={railMode ? "Datasets" : undefined}
+            >
+              <span className={styles.navIcon} aria-hidden="true">
+                <FiDatabase />
+              </span>
+              {!railMode ? <span className={styles.navLabel}>Datasets</span> : null}
+              {!railMode ? (
+                <span className={`${styles.navChevron} ${datasetsOpen ? styles.chevronOpen : ""}`}>
+                  <FiChevronDown />
+                </span>
+              ) : null}
+            </button>
+
+            {railMode ? (
+              <div className={styles.flyout}>
+                <p className={styles.flyoutTitle}>Datasets</p>
+                {onCreateDataset ? (
+                  <button type="button" className={styles.flyoutAction} onClick={onCreateDataset}>
+                    <FiPlus /> Upload dataset
+                  </button>
+                ) : null}
+                {datasets.map((dataset) => (
+                  <button
+                    key={dataset.id}
+                    type="button"
+                    className={mainView === "dataset" && selectedDatasetId === dataset.id ? styles.active : ""}
+                    onClick={() => selectDataset(dataset.id)}
+                  >
+                    {dataset.name}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {!railMode && datasetsOpen ? (
+              <div className={styles.submenu}>
+                {onCreateDataset ? (
+                  <button type="button" className={styles.sidebarAction} onClick={onCreateDataset}>
+                    <FiPlus aria-hidden="true" />
+                    Upload dataset
+                  </button>
+                ) : null}
+                {datasets.length === 0 ? <p className={styles.emptyHint}>No datasets yet</p> : null}
+                {datasets.map((dataset) => (
+                  <button
+                    key={dataset.id}
+                    type="button"
+                    className={`${styles.navChild} ${
+                      mainView === "dataset" && selectedDatasetId === dataset.id ? styles.active : ""
+                    }`}
+                    onClick={() => selectDataset(dataset.id)}
+                    title={dataset.name}
+                  >
+                    <span className={styles.navIconSm} aria-hidden="true">
+                      <FiHardDrive />
+                    </span>
+                    <span className={styles.itemContent}>
+                      <span className={styles.itemTitle}>{dataset.name}</span>
+                      <span className={styles.itemMeta}>{dataset.updated}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            className={`${styles.navFlat} ${mainView === "profile" ? styles.active : ""}`}
+            onClick={() => {
+              onSelectProfile();
+              closeMobile();
+            }}
+            data-tooltip={railMode ? "Profile" : undefined}
+          >
+            <span className={styles.navIcon} aria-hidden="true">
+              <FiUser />
+            </span>
+            {!railMode ? <span className={styles.navLabel}>Profile</span> : null}
           </button>
-          {!isCollapsed ? <p className={styles.sidebarHint}>Workspace navigation</p> : null}
-        </div>
-
-        <div className={styles.sidebarSection}>
-          {!isCollapsed ? (
-            <p className={styles.sectionLabel}>
-              <FiActivity aria-hidden="true" />
-              Experiments
-            </p>
-          ) : null}
-          {!isCollapsed && onCreateExperiment ? (
-            <button className={styles.sidebarAction} type="button" onClick={onCreateExperiment}>
-              New experiment
-            </button>
-          ) : null}
-          <nav className={styles.navList} aria-label="Experiments">
-            {experiments.length === 0 && !isCollapsed ? (
-              <p className={styles.emptyHint}>No experiments yet</p>
-            ) : null}
-            {experiments.map((experiment) => (
-              <button
-                key={experiment.id}
-                className={mainView === "experiment" && selectedExperimentId === experiment.id ? styles.active : ""}
-                onClick={() => onSelectExperiment(experiment.id)}
-                title={experiment.name}
-              >
-                <span className={styles.navIcon} aria-hidden="true">
-                  <FiActivity />
-                </span>
-                {!isCollapsed ? (
-                  <span className={styles.itemContent}>
-                    <span className={styles.itemTitle}>{experiment.name}</span>
-                    <span className={styles.itemMeta}>{new Date(experiment.updatedAt).toLocaleDateString()}</span>
-                  </span>
-                ) : null}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        <div className={styles.sidebarSection}>
-          {!isCollapsed ? (
-            <p className={styles.sectionLabel}>
-              <FiDatabase aria-hidden="true" />
-              Datasets
-            </p>
-          ) : null}
-          {!isCollapsed && onCreateDataset ? (
-            <button className={styles.sidebarAction} type="button" onClick={onCreateDataset}>
-              Upload dataset
-            </button>
-          ) : null}
-          <nav className={styles.navList} aria-label="Datasets">
-            {datasets.length === 0 && !isCollapsed ? (
-              <p className={styles.emptyHint}>No datasets yet</p>
-            ) : null}
-            {datasets.map((dataset) => (
-              <button
-                key={dataset.id}
-                className={mainView === "dataset" && selectedDatasetId === dataset.id ? styles.active : ""}
-                onClick={() => onSelectDataset(dataset.id)}
-                title={dataset.name}
-              >
-                <span className={styles.navIcon} aria-hidden="true">
-                  <FiHardDrive />
-                </span>
-                {!isCollapsed ? (
-                  <span className={styles.itemContent}>
-                    <span className={styles.itemTitle}>{dataset.name}</span>
-                    <span className={styles.itemMeta}>{dataset.updated}</span>
-                  </span>
-                ) : null}
-              </button>
-            ))}
-          </nav>
-        </div>
+        </nav>
       </aside>
 
       <div className={styles.mainColumn}>
-        <header className={styles.navBar}>
-          <div className={styles.navBrand}>
-            <Link href="/" className={styles.logoLink}>
-              <Image src={derbyLogo} alt="University of Derby" priority />
-              <span>Multi Omics Dashboard</span>
-            </Link>
-          </div>
-          <div className={styles.navActions}>
+        <header className={styles.topBar}>
+          <div className={styles.topBarLeft}>
             <button
-              className={`${styles.navButton} ${mainView === "profile" ? styles.navActive : ""}`}
               type="button"
-              onClick={onSelectProfile}
+              className={styles.menuToggle}
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation"
             >
-              <FiUser aria-hidden="true" />
-              Profile
+              <FiMenu />
             </button>
-            <button className={styles.navButton} type="button" onClick={onSignOut}>
-              <FiLogOut aria-hidden="true" />
-              Sign-Out
-            </button>
+            <h1 className={styles.appTitle}>{pageTitle}</h1>
+          </div>
+
+          <div className={styles.topBarRight}>
+            <span className={styles.userName}>{displayName}</span>
+
+            <div className={styles.avatarWrap} ref={avatarRef}>
+              <button
+                type="button"
+                className={styles.avatarButton}
+                aria-haspopup="menu"
+                aria-expanded={avatarMenuOpen}
+                onClick={() => setAvatarMenuOpen((value) => !value)}
+              >
+                <span className={styles.avatar}>{initials || "U"}</span>
+              </button>
+              {avatarMenuOpen ? (
+                <div className={styles.avatarMenu} role="menu">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      onSelectProfile();
+                      setAvatarMenuOpen(false);
+                    }}
+                  >
+                    <FiUser aria-hidden="true" />
+                    Profile
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setAvatarMenuOpen(false);
+                      onSignOut();
+                    }}
+                  >
+                    <FiLogOut aria-hidden="true" />
+                    Sign out
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
         </header>
 
-        <main className={styles.dashboardMain}>
-          <header className={styles.topbar}>
-            <h1>{pageTitle}</h1>
-          </header>
-          <div className={styles.pageBody}>{children}</div>
-        </main>
-
-        <footer className={styles.footer}>
-          <span>Creative Commons</span>
-          <span>University of Derby Multi Omics Dashboard</span>
-        </footer>
+        <main className={styles.dashboardMain}>{children}</main>
       </div>
     </div>
   );

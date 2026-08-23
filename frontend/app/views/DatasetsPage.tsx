@@ -5,6 +5,7 @@ import data from "../data/dashboard.json";
 import { useAppShell } from "../components/providers/AppProviders";
 import { InputModalModel } from "../models/modal";
 import { ToastModel } from "../models/toast";
+import { PageShell } from "../components/dashboard/PageShell";
 import { MiniHeatmap } from "../components/ui/MiniHeatmap";
 import { Panel } from "../components/ui/Panel";
 import { Section } from "../components/ui/Section";
@@ -149,46 +150,54 @@ export function DatasetsPage({
   const omicsLayers = data.omicsLayers as Record<OmicsLayerKey, OmicsLayer>;
 
   return (
-    <>
-      <Section title="Selected dataset">
-        <Panel title={dataset.name} meta={dataset.type}>
-          <div className={styles.datasetStats}>
-            <span>
-              <b>{dataset.samples.toLocaleString()}</b>samples
-            </span>
-            <span>
-              <b>{dataset.features.toLocaleString()}</b>features
-            </span>
-            <span>
-              <b>{dataset.quality}%</b>quality
-            </span>
-            <span>
-              <b>{dataset.updated}</b>updated
-            </span>
-          </div>
-          <div className={styles.datasetActions}>
-            {onRename ? (
-              <button className={ui.button} type="button" onClick={onRename}>
-                Rename
-              </button>
-            ) : null}
-            {onDownload ? (
-              <button className={ui.button} type="button" onClick={onDownload}>
-                Download
-              </button>
-            ) : null}
-            {onDelete ? (
-              <button className={ui.button} type="button" onClick={onDelete}>
-                Delete
-              </button>
-            ) : null}
-          </div>
-        </Panel>
-      </Section>
+    <PageShell
+      category="Dataset"
+      title={dataset.name}
+      actions={
+        <>
+          {onRename ? (
+            <button className={ui.button} type="button" onClick={onRename}>
+              Rename
+            </button>
+          ) : null}
+          {onDownload ? (
+            <button className={ui.button} type="button" onClick={onDownload}>
+              Download
+            </button>
+          ) : null}
+          {onDelete ? (
+            <button className={ui.button} type="button" onClick={onDelete}>
+              Delete
+            </button>
+          ) : null}
+        </>
+      }
+    >
+      <div className={ui.metricStrip}>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Samples</p>
+          <p className={ui.metricValue}>{dataset.samples.toLocaleString()}</p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Features</p>
+          <p className={ui.metricValue}>{dataset.features.toLocaleString()}</p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Quality</p>
+          <p className={ui.metricValue}>{dataset.quality}%</p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Updated</p>
+          <p className={ui.metricValue} style={{ fontSize: "calc(18px * var(--ui-scale))" }}>
+            {dataset.updated}
+          </p>
+          <p className={ui.metricDetail}>{dataset.type}</p>
+        </div>
+      </div>
 
       {layerKeys.map((layerKey) => (
         <OmicsLayerSection key={layerKey} layerKey={layerKey} layer={omicsLayers[layerKey]} />
       ))}
-    </>
+    </PageShell>
   );
 }
