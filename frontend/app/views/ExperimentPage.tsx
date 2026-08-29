@@ -10,6 +10,7 @@ import {
   type Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { MultiOmicsIntegrationPanel } from "../components/multi-omics/MultiOmicsIntegrationPanel";
 import { useAppShell } from "../components/providers/AppProviders";
 import { PageShell } from "../components/dashboard/PageShell";
 import { Panel } from "../components/ui/Panel";
@@ -24,10 +25,12 @@ export function ExperimentPage({
   experiment,
   datasets,
   workflowSteps,
+  onWorkflowRefresh,
 }: {
   experiment: Experiment;
   datasets: DatasetItem[];
   workflowSteps?: WorkflowStep[];
+  onWorkflowRefresh?: () => void;
 }) {
   const { showToast } = useAppShell();
   const [selectedDataset, setSelectedDataset] = useState(experiment.dataset);
@@ -224,6 +227,12 @@ export function ExperimentPage({
           ))}
         </div>
       </Section>
+
+      <MultiOmicsIntegrationPanel
+        experimentId={experiment.id}
+        datasets={datasets}
+        onWorkflowRefresh={() => onWorkflowRefresh?.()}
+      />
     </PageShell>
   );
 }

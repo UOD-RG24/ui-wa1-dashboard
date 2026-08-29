@@ -341,6 +341,7 @@ function DashboardHome({ user }: { user: ApiUser }) {
           experiment={selectedExperiment}
           datasets={datasets}
           workflowSteps={workflowByExperiment[selectedExperiment.id]}
+          onWorkflowRefresh={() => void refreshLists()}
         />
       ) : null}
       {mainView === "dataset" && selectedDataset ? (
