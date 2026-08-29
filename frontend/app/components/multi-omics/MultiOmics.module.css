@@ -1,0 +1,344 @@
+.stepSection {
+  scroll-margin-top: calc(24px * var(--ui-scale));
+}
+
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: calc(16px * var(--ui-scale));
+}
+
+.stepperWrap {
+  margin-bottom: calc(20px * var(--ui-scale));
+  padding: calc(12px * var(--ui-scale));
+  background: var(--surface-strong, #f1f5f9);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.datasetRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(12px * var(--ui-scale));
+  margin-bottom: calc(16px * var(--ui-scale));
+}
+
+.datasetRow label {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4px * var(--ui-scale));
+  font-size: calc(13px * var(--ui-scale));
+  color: var(--muted);
+}
+
+.datasetRow select {
+  min-width: 220px;
+  padding: calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: calc(14px * var(--ui-scale));
+}
+
+.dropzone {
+  border: 2px dashed var(--line-strong);
+  border-radius: 4px;
+  padding: calc(24px * var(--ui-scale));
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: var(--surface-subtle);
+}
+
+.dropzone:hover,
+.dropzoneActive {
+  border-color: var(--navy);
+  background: var(--accent-soft);
+}
+
+.dropzoneDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dropzoneHint {
+  margin: 0;
+  font-size: calc(13px * var(--ui-scale));
+  color: var(--muted);
+}
+
+.dropzoneFile {
+  margin-top: calc(8px * var(--ui-scale));
+  font-size: calc(14px * var(--ui-scale));
+  color: var(--foreground);
+}
+
+.tableWrap {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: calc(13px * var(--ui-scale));
+}
+
+.table th,
+.table td {
+  padding: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.table th {
+  background: var(--surface-subtle);
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: var(--accent-soft);
+}
+
+.tableEmpty {
+  padding: calc(24px * var(--ui-scale));
+  text-align: center;
+  color: var(--muted);
+  font-size: calc(14px * var(--ui-scale));
+}
+
+.tableFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-top: 1px solid var(--line);
+  font-size: calc(12px * var(--ui-scale));
+  color: var(--muted);
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(4px * var(--ui-scale));
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.iconBtn:hover {
+  color: var(--navy);
+  background: var(--accent-soft);
+}
+
+.healthLayout {
+  display: grid;
+  grid-template-columns: minmax(140px, 200px) 1fr;
+  gap: calc(16px * var(--ui-scale));
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .healthLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chartFrame {
+  height: calc(180px * var(--ui-scale));
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: calc(8px * var(--ui-scale));
+  background: var(--surface-subtle);
+}
+
+.chartFrameTall {
+  height: calc(220px * var(--ui-scale));
+}
+
+.jsonTree {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: calc(8px * var(--ui-scale));
+  max-height: calc(280px * var(--ui-scale));
+  overflow: auto;
+  font-size: calc(12px * var(--ui-scale));
+  background: var(--surface);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: calc(12px * var(--ui-scale));
+}
+
+.formGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4px * var(--ui-scale));
+  font-size: calc(13px * var(--ui-scale));
+  color: var(--muted);
+}
+
+.formGrid input,
+.formGrid select {
+  padding: calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: calc(14px * var(--ui-scale));
+}
+
+.primaryBtn {
+  padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
+  border: none;
+  border-radius: 4px;
+  background: var(--navy);
+  color: #fff;
+  font-size: calc(14px * var(--ui-scale));
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondaryBtn {
+  padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--foreground);
+  font-size: calc(13px * var(--ui-scale));
+  cursor: pointer;
+}
+
+.secondaryBtn:hover:not(:disabled) {
+  background: var(--accent-soft);
+}
+
+.blobCard {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--ui-scale));
+  padding: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  font-family: ui-monospace, monospace;
+  font-size: calc(12px * var(--ui-scale));
+}
+
+.featureListWrap {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.featureListToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8px * var(--ui-scale));
+  padding: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-subtle);
+}
+
+.featureListToolbar input[type="search"] {
+  flex: 1;
+  min-width: 160px;
+  padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: calc(13px * var(--ui-scale));
+}
+
+.featureRow {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--ui-scale));
+  padding: calc(4px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  font-size: calc(13px * var(--ui-scale));
+  border-bottom: 1px solid var(--line);
+}
+
+.featureRow label {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--ui-scale));
+  cursor: pointer;
+  width: 100%;
+}
+
+.timestamp {
+  font-size: calc(12px * var(--ui-scale));
+  color: var(--muted);
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--line);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.blockAccordion {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.blockAccordion summary {
+  padding: calc(10px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  cursor: pointer;
+  background: var(--surface-subtle);
+  font-weight: 600;
+  font-size: calc(14px * var(--ui-scale));
+}
+
+.blockAccordionBody {
+  padding: calc(12px * var(--ui-scale));
+}
+
+.dualBlockForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(16px * var(--ui-scale));
+}
+
+@media (max-width: 900px) {
+  .dualBlockForm {
+    grid-template-columns: 1fr;
+  }
+}

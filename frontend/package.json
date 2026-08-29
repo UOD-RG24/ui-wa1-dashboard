@@ -9,13 +9,19 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@azure/msal-browser": "^5.19.0",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.10",
+    "@uiw/react-json-view": "^2.0.0-alpha.43",
     "@xyflow/react": "^12.11.2",
     "chart.js": "^4.5.1",
     "next": "^16.2.10",
     "react": "19.2.4",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "19.2.4",
-    "react-icons": "^5.7.0"
+    "react-dropzone": "^20.1.1",
+    "react-icons": "^5.7.0",
+    "react-step-progress-bar": "^1.0.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

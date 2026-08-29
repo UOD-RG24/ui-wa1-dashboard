@@ -1,9 +1,10 @@
-import { apiFetch, apiFetchBlob } from "./apiClient";
+import { ApiError, apiFetch, apiFetchBlob } from "./apiClient";
 import type {
   ApiDataset,
   ApiExperiment,
   AuthStatusResponse,
   CreateExperimentBody,
+  MicrosoftStatusResponse,
   SignInResponse,
   SignUpResponse,
   UpdateDatasetBody,
@@ -36,6 +37,53 @@ export function getAuthStatus() {
 
 export function signOut() {
   return apiFetch<{ message: string }>("/auth/signout", { method: "POST" });
+}
+
+/**
+ * Exchange a Microsoft Entra access token for the API LocalJwt.
+ * Uses core-compatible microsoft status/signup/signin paths (works via Nest BFF or direct core rewrite).
+ * Prefer Nest `POST /auth/microsoft/exchange` when the BFF is available; fall back on 404.
+ */
+export async function exchangeMicrosoftToken(microsoftAccessToken: string) {
+  const headers = { Authorization: `Bearer ${microsoftAccessToken}` };
+
+  try {
+    return await apiFetch<SignInResponse>("/auth/microsoft/exchange", {
+      method: "POST",
+      auth: false,
+      headers,
+    });
+  } catch (err) {
+    if (!(err instanceof ApiError) || err.status !== 404) {
+      throw err;
+    }
+  }
+
+  const status = await apiFetch<MicrosoftStatusResponse>("/auth/microsoft/status", {
+    method: "GET",
+    auth: false,
+    headers,
+  });
+
+  if (!status.registered) {
+    try {
+      await apiFetch<SignUpResponse>("/auth/microsoft/signup", {
+        method: "POST",
+        auth: false,
+        headers,
+      });
+    } catch (err) {
+      if (!(err instanceof ApiError) || err.status !== 409) {
+        throw err;
+      }
+    }
+  }
+
+  return apiFetch<SignInResponse>("/auth/microsoft/signin", {
+    method: "POST",
+    auth: false,
+    headers,
+  });
 }
 
 export function listDatasets() {
@@ -90,6 +138,24 @@ export function createExperiment(body: CreateExperimentBody) {
 export function deleteExperiment(id: string) {
   return apiFetch<void>(`/experiments/delete/${id}`, {
     method: "DELETE",
+    skipJson: true,
+  });
+}
+
+export function updateExperimentSection(
+  experimentId: string,
+  section: "preprocessing" | "multi-omics-integration" | "training" | "evaluation" | "digital-twin",
+  body: {
+    status?: string;
+    startedDateTime?: string;
+    completedDateTime?: string;
+    processingTimeMs?: number;
+    notes?: string;
+  },
+) {
+  return apiFetch<void>(`/experiments/update/${experimentId}/${section}`, {
+    method: "PUT",
+    body,
     skipJson: true,
   });
 }
