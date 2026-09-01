@@ -4,11 +4,12 @@ import { chartPrimary } from "../../../lib/chartTheme";
 import type { ProcessStep } from "../../../lib/multiOmicsTypes";
 import styles from "../MultiOmics.module.css";
 
-export function ProcessingStepsBarChart({ steps }: { steps: ProcessStep[] }) {
-  const labels = steps.map((s, i) => s.step ?? `Step ${i + 1}`);
-  const values = steps.map((s) => s.durationMs ?? 0);
+export function ProcessingStepsBarChart({ steps }: { steps?: ProcessStep[] }) {
+  const safeSteps = Array.isArray(steps) ? steps : [];
+  const labels = safeSteps.map((s, i) => s.step ?? `Step ${i + 1}`);
+  const values = safeSteps.map((s) => s.durationMs ?? 0);
 
-  if (steps.length === 0) {
+  if (safeSteps.length === 0) {
     return (
       <div className={styles.chartFrame}>
         <p className={styles.dropzoneHint}>No step timing data available.</p>

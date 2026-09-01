@@ -66,6 +66,23 @@ export function MultiOmicsIntegrationPanel({
     if (!datasetId && datasets[0]?.id) setDatasetId(datasets[0].id);
   }, [datasetId, datasets]);
 
+  const handleFeatureExtractionComplete = useCallback(() => {
+    setHasFeatureExtraction(true);
+  }, []);
+
+  const handleDesignMatrixComplete = useCallback((ids: string[]) => {
+    setDesignMatrixBlobIds(ids);
+  }, []);
+
+  const handleFeaturesLoaded = useCallback((names: string[]) => {
+    setAvailableFeatures((prev) => {
+      if (prev.length === names.length && prev.length > 0 && prev[0] === names[0]) {
+        return prev;
+      }
+      return names;
+    });
+  }, []);
+
   const unlockedThrough = useMemo(() => {
     let max = 0;
     if (blobs.length > 0) max = Math.max(max, 1);
@@ -134,8 +151,8 @@ export function MultiOmicsIntegrationPanel({
                 experimentId={experimentId}
                 datasetId={datasetId}
                 blobs={blobs}
-                onComplete={() => setHasFeatureExtraction(true)}
-                onFeaturesLoaded={setAvailableFeatures}
+                onComplete={handleFeatureExtractionComplete}
+                onFeaturesLoaded={handleFeaturesLoaded}
                 onError={notifyError}
                 onWorkflowRefresh={onWorkflowRefresh}
               />
@@ -147,7 +164,7 @@ export function MultiOmicsIntegrationPanel({
                 datasetId={datasetId}
                 blobs={blobs}
                 availableFeatures={availableFeatures}
-                onComplete={(ids) => setDesignMatrixBlobIds(ids)}
+                onComplete={handleDesignMatrixComplete}
                 onError={notifyError}
                 onWorkflowRefresh={onWorkflowRefresh}
               />

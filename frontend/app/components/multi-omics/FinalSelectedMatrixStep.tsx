@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ApiError } from "../../lib/apiClient";
 import {
   generateFinalSelectedMatrix,
@@ -12,6 +12,7 @@ import { FinalMatrixBarChart } from "./charts/ApplyWeightsBlockChart";
 import { ProcessingStepsBarChart } from "./charts/ProcessingStepsBarChart";
 import { OutputBlobCard } from "./OutputBlobCard";
 import styles from "./MultiOmics.module.css";
+import { useExperimentStepLoad, useLatestRef } from "./useExperimentStepLoad";
 
 export function FinalSelectedMatrixStep({
   experimentId,
@@ -34,21 +35,22 @@ export function FinalSelectedMatrixStep({
   const [generating, setGenerating] = useState(false);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
+  const onErrorRef = useLatestRef(onError);
+
   const load = useCallback(async () => {
     try {
       const result = await getFinalSelectedMatrix(experimentId);
       setItems(result);
       setLoadedAt(new Date().toLocaleString());
     } catch (err) {
-      onError(err instanceof ApiError ? err.message : "Could not load final matrix results.");
+      onErrorRef.current(err instanceof ApiError ? err.message : "Could not load final matrix results.");
     }
-  }, [experimentId, onError]);
+  }, [experimentId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useExperimentStepLoad(experimentId, load);
 
-  const latest = items[items.length - 1]?.createFinalSelectedMatrix;
+  const latestItem = items.length > 0 ? items[items.length - 1] : null;
+  const latest = latestItem?.createFinalSelectedMatrix;
 
   const handleGenerate = async () => {
     if (!datasetId || !weightsBlobId || !weightedMatrixBlobId) {
@@ -109,7 +111,7 @@ export function FinalSelectedMatrixStep({
             selectedFeatureCount={latest.selectedFeatureCount}
           />
           <ProcessingStepsBarChart steps={latest.steps ?? []} />
-          <OutputBlobCard label="Final selected matrix blob" blobId={items[items.length - 1]?.finalSelectedMatrixBlobId} />
+          <OutputBlobCard label="Final selected matrix blob" blobId={latestItem?.finalSelectedMatrixBlobId} />
         </>
       ) : (
         <p className={styles.dropzoneHint}>No cached final matrix results.</p>

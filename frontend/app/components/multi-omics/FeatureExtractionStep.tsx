@@ -1,13 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ApiError } from "../../lib/apiClient";
 import {
   generateFeatureExtraction,
   getFeatureExtraction,
 } from "../../lib/multiOmicsApi";
 import type { Blob, FeatureExtractionItem } from "../../lib/multiOmicsTypes";
+import {
+  featureNamesFromExtractionItems,
+  normalizeFeatureExtraction,
+} from "../../lib/multiOmicsMappers";
 import { syncMultiOmicsSection } from "../../lib/multiOmicsSectionSync";
+import { useExperimentStepLoad, useLatestRef } from "./useExperimentStepLoad";
 import { BlobSelect } from "./BlobSelect";
 import { FeatureColumnDoughnutChart } from "./charts/RgccaHealthDoughnutChart";
 import { ProcessingStepsBarChart } from "./charts/ProcessingStepsBarChart";
@@ -38,27 +43,32 @@ export function FeatureExtractionStep({
   const [generating, setGenerating] = useState(false);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
+  const onCompleteRef = useLatestRef(onComplete);
+  const onFeaturesLoadedRef = useLatestRef(onFeaturesLoaded);
+  const onErrorRef = useLatestRef(onError);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const result = await getFeatureExtraction(experimentId);
       setItems(result);
       setLoadedAt(new Date().toLocaleString());
-      if (result.length > 0) onComplete();
-      const names = result[result.length - 1]?.designMatrixFeatureExtraction?.featureNames ?? [];
-      if (names.length > 0) onFeaturesLoaded?.(names);
+      if (result.length > 0) onCompleteRef.current();
+      const names = featureNamesFromExtractionItems(result);
+      if (names.length > 0) onFeaturesLoadedRef.current?.(names);
     } catch (err) {
-      onError(err instanceof ApiError ? err.message : "Could not load feature extraction results.");
+      onErrorRef.current(
+        err instanceof ApiError ? err.message : "Could not load feature extraction results.",
+      );
     } finally {
       setLoading(false);
     }
-  }, [experimentId, onComplete, onError, onFeaturesLoaded]);
+  }, [experimentId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useExperimentStepLoad(experimentId, load);
 
-  const latest = items[items.length - 1]?.designMatrixFeatureExtraction;
+  const latestItem = items[items.length - 1];
+  const latest = latestItem ? normalizeFeatureExtraction(latestItem) : null;
 
   const handleGenerate = async () => {
     if (!datasetId || !blobId) {

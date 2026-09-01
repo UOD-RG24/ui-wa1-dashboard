@@ -1,4 +1,4 @@
-import { apiFetch } from "./apiClient";
+import { ApiError, apiFetch } from "./apiClient";
 import type {
   ApplySGCCAWeightsItem,
   ApplySGCCAWeightsRequest,
@@ -18,6 +18,22 @@ const moi = (experimentId: string) =>
   `/experiments/get/${experimentId}/multi-omics-integration`;
 
 const blobs = (experimentId: string) => `/experiments/get/${experimentId}/blobs`;
+
+/** No multi-omics record yet — core API returns 404; treat as empty list. */
+function normalizeListResponse<T>(value: T[] | T | null | undefined): T[] {
+  if (value == null) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+async function getListOrEmpty<T>(path: string): Promise<T[]> {
+  try {
+    const data = await apiFetch<T[] | T | null>(path);
+    return normalizeListResponse(data);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return [];
+    throw err;
+  }
+}
 
 export function uploadExperimentBlob(experimentId: string, file: File) {
   const form = new FormData();
@@ -44,7 +60,7 @@ export function getRgccaHealth(experimentId: string) {
 }
 
 export function getFeatureExtraction(experimentId: string) {
-  return apiFetch<FeatureExtractionItem[]>(
+  return getListOrEmpty<FeatureExtractionItem>(
     `${moi(experimentId)}/design-matrix/feature-extraction/get`,
   );
 }
@@ -57,7 +73,7 @@ export function generateFeatureExtraction(experimentId: string, body: FeatureExt
 }
 
 export function getDefinedFeatureMatrix(experimentId: string) {
-  return apiFetch<CreateDefinedFeatureMatrixItem[]>(
+  return getListOrEmpty<CreateDefinedFeatureMatrixItem>(
     `${moi(experimentId)}/design-matrix/create_defined_feature_matrix/get`,
   );
 }
@@ -73,7 +89,7 @@ export function generateDefinedFeatureMatrix(
 }
 
 export function getExtractSgccaWeights(experimentId: string) {
-  return apiFetch<ExtractSGCCAWeightsItem[]>(
+  return getListOrEmpty<ExtractSGCCAWeightsItem>(
     `${moi(experimentId)}/weights/extract-sgcca-weights/get`,
   );
 }
@@ -89,7 +105,7 @@ export function generateExtractSgccaWeights(
 }
 
 export function getApplySgccaWeights(experimentId: string) {
-  return apiFetch<ApplySGCCAWeightsItem[]>(
+  return getListOrEmpty<ApplySGCCAWeightsItem>(
     `${moi(experimentId)}/weights/apply-sgcca-weights/get`,
   );
 }
@@ -102,7 +118,7 @@ export function generateApplySgccaWeights(experimentId: string, body: ApplySGCCA
 }
 
 export function getFinalSelectedMatrix(experimentId: string) {
-  return apiFetch<CreateFinalSelectedMatrixItem[]>(
+  return getListOrEmpty<CreateFinalSelectedMatrixItem>(
     `${moi(experimentId)}/weights/create-final-selected-matrix/get`,
   );
 }

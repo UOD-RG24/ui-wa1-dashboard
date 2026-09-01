@@ -1,12 +1,13 @@
 "use client";
 
 import JsonView from "@uiw/react-json-view";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ApiError } from "../../lib/apiClient";
 import { getRgccaHealth } from "../../lib/multiOmicsApi";
 import type { RgccaHealthResponse } from "../../lib/multiOmicsTypes";
 import { RgccaHealthDoughnutChart } from "./charts/RgccaHealthDoughnutChart";
 import styles from "./MultiOmics.module.css";
+import { useExperimentStepLoad, useLatestRef } from "./useExperimentStepLoad";
 
 export function RgccaHealthPanel({
   experimentId,
@@ -20,6 +21,8 @@ export function RgccaHealthPanel({
   const [loading, setLoading] = useState(false);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
+  const onErrorRef = useLatestRef(onError);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -30,18 +33,16 @@ export function RgccaHealthPanel({
     } catch (err) {
       setHealthy(false);
       if (err instanceof ApiError && err.status !== 502) {
-        onError(err.message);
+        onErrorRef.current(err.message);
       }
       setData(err instanceof ApiError ? (err.body as RgccaHealthResponse) ?? { error: err.message } : null);
       setLoadedAt(new Date().toLocaleString());
     } finally {
       setLoading(false);
     }
-  }, [experimentId, onError]);
+  }, [experimentId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useExperimentStepLoad(experimentId, load);
 
   return (
     <div className={styles.stepContent}>

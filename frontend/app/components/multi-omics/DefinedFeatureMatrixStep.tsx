@@ -1,18 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ApiError } from "../../lib/apiClient";
 import {
   generateDefinedFeatureMatrix,
   getDefinedFeatureMatrix,
 } from "../../lib/multiOmicsApi";
 import type { Blob, CreateDefinedFeatureMatrixItem } from "../../lib/multiOmicsTypes";
+import { normalizeDefinedFeatureMatrix } from "../../lib/multiOmicsMappers";
 import { syncMultiOmicsSection } from "../../lib/multiOmicsSectionSync";
 import { DefinedMatrixComparisonChart } from "./charts/ApplyWeightsBlockChart";
 import { BlobSelect } from "./BlobSelect";
 import { OutputBlobCard } from "./OutputBlobCard";
 import styles from "./MultiOmics.module.css";
 import { VirtualizedFeatureCheckboxList } from "./VirtualizedFeatureCheckboxList";
+import { useExperimentStepLoad, useLatestRef } from "./useExperimentStepLoad";
 
 export function DefinedFeatureMatrixStep({
   experimentId,
@@ -37,25 +39,26 @@ export function DefinedFeatureMatrixStep({
   const [generating, setGenerating] = useState(false);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
+  const onCompleteRef = useLatestRef(onComplete);
+  const onErrorRef = useLatestRef(onError);
+
   const load = useCallback(async () => {
     try {
       const result = await getDefinedFeatureMatrix(experimentId);
       setItems(result);
       setLoadedAt(new Date().toLocaleString());
       const ids = result.map((r) => r.designMatrixBlobId).filter(Boolean) as string[];
-      if (ids.length >= 2) onComplete(ids);
+      if (ids.length >= 2) onCompleteRef.current(ids);
     } catch (err) {
-      onError(err instanceof ApiError ? err.message : "Could not load defined matrix results.");
+      onErrorRef.current(err instanceof ApiError ? err.message : "Could not load defined matrix results.");
     }
-  }, [experimentId, onComplete, onError]);
+  }, [experimentId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useExperimentStepLoad(experimentId, load);
 
   const chartBlocks = useMemo(() => {
     return items.map((item, i) => {
-      const info = item.designMatrixDefinedFeatureMatrix;
+      const info = normalizeDefinedFeatureMatrix(item);
       return {
         label: `Block ${i + 1}`,
         selected: info?.selectedFeatureCount ?? selected.size,
@@ -65,8 +68,18 @@ export function DefinedFeatureMatrixStep({
   }, [items, selected.size, availableFeatures.length]);
 
   const handleGenerate = async (blockLabel: string) => {
-    if (!datasetId || !blobId || selected.size === 0) {
-      onError("Select dataset, blob, and at least one feature.");
+    if (!datasetId || !blobId) {
+      onError("Select a dataset and preprocessed matrix blob.");
+      return;
+    }
+    if (availableFeatures.length === 0) {
+      onError(
+        "No features available. Run Step 3 (Feature extraction) for this blob first, then return here.",
+      );
+      return;
+    }
+    if (selected.size === 0) {
+      onError("Select at least one feature from the list (use Select all or check individual features).");
       return;
     }
     setGenerating(true);
@@ -103,6 +116,12 @@ export function DefinedFeatureMatrixStep({
       </div>
 
       <VirtualizedFeatureCheckboxList features={availableFeatures} selected={selected} onChange={setSelected} />
+
+      {availableFeatures.length === 0 ? (
+        <p className={styles.dropzoneHint}>
+          Feature list is empty. Complete Step 3 for the matching preprocessed blob, then scroll back here.
+        </p>
+      ) : null}
 
       <div className={styles.dualBlockForm}>
         <button

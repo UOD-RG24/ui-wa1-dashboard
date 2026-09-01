@@ -3,6 +3,32 @@ import type { ApiErrorBody } from "./apiTypes";
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api").replace(/\/$/, "");
 
+/** Multipart uploads bypass Next's /api rewrite — it buffers bodies and breaks large files. */
+function directBffBase(): string | null {
+  const fromEnv = process.env.NEXT_PUBLIC_BFF_URL?.trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  if (process.env.NODE_ENV === "development") {
+    return "http://127.0.0.1:3001";
+  }
+  return null;
+}
+
+function isFormDataBody(body: ApiFetchOptions["body"]): boolean {
+  return typeof FormData !== "undefined" && body instanceof FormData;
+}
+
+function resolveApiBase(body: ApiFetchOptions["body"]): string {
+  if (isFormDataBody(body)) {
+    const direct = directBffBase();
+    if (direct) return direct;
+  }
+  return API_BASE;
+}
+
+function buildUrl(path: string, base: string): string {
+  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 export class ApiError extends Error {
   status: number;
   body: unknown;
@@ -45,7 +71,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   }
 
   const body = resolveBody(options.body, headers);
-  const response = await fetch(`${API_BASE}${path.startsWith("/") ? path : `/${path}`}`, {
+  const response = await fetch(buildUrl(path, resolveApiBase(options.body)), {
     ...options,
     headers,
     body,
@@ -59,14 +85,18 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   }
 
   if (!response.ok) {
+    const raw = await response.text();
     let parsed: unknown = null;
-    try {
-      parsed = await response.json();
-    } catch {
-      parsed = null;
+    if (raw) {
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        parsed = raw;
+      }
     }
     const message =
       (parsed as ApiErrorBody | null)?.message ??
+      (typeof parsed === "string" && parsed.trim() ? parsed.trim() : null) ??
       response.statusText ??
       `Request failed (${response.status})`;
     throw new ApiError(message, response.status, parsed);

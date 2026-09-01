@@ -85,9 +85,13 @@ export interface FeatureExtractionProcessInfo {
   [key: string]: unknown;
 }
 
+/** Nested payload returned by core-wa1-api for each extraction record. */
+export type FeatureExtractionRecord = FeatureExtractionProcessInfo & Record<string, unknown>;
+
 export interface FeatureExtractionItem {
   preprocessedMatrixBlobId?: string;
-  designMatrixFeatureExtraction?: FeatureExtractionProcessInfo;
+  designMatrixFeatureExtraction?: FeatureExtractionRecord;
+  featureExtraction?: FeatureExtractionRecord;
 }
 
 export interface DefinedFeatureMatrixProcessInfo {
@@ -148,6 +152,7 @@ export interface ApplySGCCAWeightsItem {
   sgccaFeatureWeightedMatrixBlobId1?: string;
   sgccaFeatureWeightedMatrixBlobId2?: string;
   designMatrixDefinedFeatureMatrix?: ApplySGCCAWeightsProcessInfo;
+  applySGCCAWeights?: ApplySGCCAWeightsProcessInfo;
 }
 
 export interface CreateFinalSelectedMatrixProcessInfo {

@@ -6,6 +6,7 @@ export type ApiUser = {
   signupDateTime?: string;
   status: string;
   role: string;
+  authenticationProvider?: string;
 };
 
 export type AuthStatusResponse = {
@@ -18,6 +19,12 @@ export type SignInResponse = {
   message: string;
   accessToken: string;
   user: ApiUser;
+};
+
+export type MicrosoftStatusResponse = {
+  microsoftAuthenticated: boolean;
+  registered: boolean;
+  user?: Pick<ApiUser, "id" | "firstName" | "lastName" | "email" | "status" | "role"> | null;
 };
 
 export type SignUpResponse = {

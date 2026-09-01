@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ApiError } from "../../lib/apiClient";
 import {
   generateExtractSgccaWeights,
@@ -13,6 +13,7 @@ import { ProcessingStepsBarChart } from "./charts/ProcessingStepsBarChart";
 import { SparsityBarChart, WeightsFunnelBarChart } from "./charts/WeightsFunnelBarChart";
 import { OutputBlobCard } from "./OutputBlobCard";
 import styles from "./MultiOmics.module.css";
+import { useExperimentStepLoad, useLatestRef } from "./useExperimentStepLoad";
 
 export function ExtractSgccaWeightsStep({
   experimentId,
@@ -37,23 +38,25 @@ export function ExtractSgccaWeightsStep({
   const [generating, setGenerating] = useState(false);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
+  const onCompleteRef = useLatestRef(onComplete);
+  const onErrorRef = useLatestRef(onError);
+
   const load = useCallback(async () => {
     try {
       const result = await getExtractSgccaWeights(experimentId);
       setItems(result);
       setLoadedAt(new Date().toLocaleString());
       const blobId = result[result.length - 1]?.sgccaWeightsMatrixBlobId;
-      if (blobId) onComplete(blobId);
+      if (blobId) onCompleteRef.current(blobId);
     } catch (err) {
-      onError(err instanceof ApiError ? err.message : "Could not load weights results.");
+      onErrorRef.current(err instanceof ApiError ? err.message : "Could not load weights results.");
     }
-  }, [experimentId, onComplete, onError]);
+  }, [experimentId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useExperimentStepLoad(experimentId, load);
 
-  const latest = items[items.length - 1]?.extractSGCCAWeights;
+  const latestItem = items.length > 0 ? items[items.length - 1] : null;
+  const latest = latestItem?.extractSGCCAWeights;
 
   const handleGenerate = async () => {
     if (!datasetId || !designMatrixBlobIds) {
@@ -127,7 +130,7 @@ export function ExtractSgccaWeightsStep({
             selectedFeatures={latest.selectedFeatures}
           />
           <ProcessingStepsBarChart steps={latest.steps ?? []} />
-          <OutputBlobCard label="sGCCA weights blob" blobId={items[items.length - 1]?.sgccaWeightsMatrixBlobId} />
+          <OutputBlobCard label="sGCCA weights blob" blobId={latestItem?.sgccaWeightsMatrixBlobId} />
         </>
       ) : (
         <p className={styles.dropzoneHint}>No cached extract-weights results.</p>

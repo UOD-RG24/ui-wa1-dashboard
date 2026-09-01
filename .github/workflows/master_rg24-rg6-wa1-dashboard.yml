@@ -38,6 +38,12 @@ jobs:
           npm ci --prefix backend
 
       - name: Build application
+        env:
+          NEXT_PUBLIC_AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+          NEXT_PUBLIC_AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+          NEXT_PUBLIC_AZURE_AD_API_SCOPE: ${{ secrets.AZURE_AD_API_SCOPE }}
+          # Until Nest is deployed, production rewrites /api to core-wa1-api.
+          DASHBOARD_BFF_URL: ${{ vars.DASHBOARD_BFF_URL }}
         run: |
           npm run build --prefix frontend
           npm run build --prefix backend

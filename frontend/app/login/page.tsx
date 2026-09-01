@@ -4,9 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { getAuthStatus, signIn, signUp } from "../lib/api";
+import { exchangeMicrosoftToken, getAuthStatus, signIn, signUp } from "../lib/api";
 import { ApiError } from "../lib/apiClient";
 import { getAccessToken, setAccessToken, setStoredUser } from "../lib/authStorage";
+import { acquireMicrosoftAccessToken, isMicrosoftAuthConfigured } from "../lib/msal";
 import derbyLogo from "../university-of-derby-logo-01.webp";
 import styles from "./LoginPage.module.css";
 
@@ -32,6 +33,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [microsoftPending, setMicrosoftPending] = useState(false);
+  const microsoftConfigured = isMicrosoftAuthConfigured();
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +75,35 @@ export default function LoginPage() {
     }
   };
 
+  const onMicrosoftSignIn = async () => {
+    setError(null);
+    setMicrosoftPending(true);
+    try {
+      const microsoftAccessToken = await acquireMicrosoftAccessToken();
+      const result = await exchangeMicrosoftToken(microsoftAccessToken);
+      setAccessToken(result.accessToken);
+      setStoredUser(result.user);
+      router.replace("/");
+    } catch (err) {
+      if (err && typeof err === "object" && "errorCode" in err) {
+        const code = String((err as { errorCode?: string }).errorCode ?? "");
+        if (code === "user_cancelled" || code === "popup_window_error") {
+          setError("Microsoft sign-in was cancelled.");
+          return;
+        }
+      }
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Microsoft sign-in failed. Please try again.";
+      setError(message);
+    } finally {
+      setMicrosoftPending(false);
+    }
+  };
+
   return (
     <main className={styles.loginPage}>
       <div className={styles.loginCenter}>
@@ -91,11 +123,20 @@ export default function LoginPage() {
             <button
               className={styles.ssoButton}
               type="button"
-              disabled
-              title="Microsoft sign-in is not enabled yet"
+              disabled={!microsoftConfigured || microsoftPending || pending}
+              title={
+                microsoftConfigured
+                  ? "Sign in with Microsoft"
+                  : "Set NEXT_PUBLIC_AZURE_AD_CLIENT_ID, TENANT_ID, and API_SCOPE to enable Microsoft sign-in"
+              }
+              onClick={() => void onMicrosoftSignIn()}
             >
               <MicrosoftMark />
-              Microsoft sign-in (coming soon)
+              {microsoftPending
+                ? "Signing in with Microsoft…"
+                : microsoftConfigured
+                  ? "Microsoft sign-in"
+                  : "Microsoft sign-in (not configured)"}
             </button>
 
             <div className={styles.divider}>or</div>
@@ -169,7 +210,7 @@ export default function LoginPage() {
               <Link href="/login">Forgot password?</Link>
             </div>
 
-            <button className={styles.secondaryButton} type="submit" disabled={pending}>
+            <button className={styles.secondaryButton} type="submit" disabled={pending || microsoftPending}>
               {pending ? "Please wait…" : mode === "signin" ? "Sign in" : "Sign up"}
             </button>
           </form>

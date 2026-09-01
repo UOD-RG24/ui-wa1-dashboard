@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ApiError } from "../../lib/apiClient";
 import {
   generateApplySgccaWeights,
@@ -11,6 +11,7 @@ import { syncMultiOmicsSection } from "../../lib/multiOmicsSectionSync";
 import { ApplyWeightsBlockChart } from "./charts/ApplyWeightsBlockChart";
 import { OutputBlobCard } from "./OutputBlobCard";
 import styles from "./MultiOmics.module.css";
+import { useExperimentStepLoad, useLatestRef } from "./useExperimentStepLoad";
 
 export function ApplySgccaWeightsStep({
   experimentId,
@@ -35,6 +36,9 @@ export function ApplySgccaWeightsStep({
   const [generating, setGenerating] = useState(false);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
 
+  const onCompleteRef = useLatestRef(onComplete);
+  const onErrorRef = useLatestRef(onError);
+
   const load = useCallback(async () => {
     try {
       const result = await getApplySgccaWeights(experimentId);
@@ -42,18 +46,17 @@ export function ApplySgccaWeightsStep({
       setLoadedAt(new Date().toLocaleString());
       const latest = result[result.length - 1];
       if (latest?.sgccaFeatureWeightedMatrixBlobId1 && latest?.sgccaFeatureWeightedMatrixBlobId2) {
-        onComplete([latest.sgccaFeatureWeightedMatrixBlobId1, latest.sgccaFeatureWeightedMatrixBlobId2]);
+        onCompleteRef.current([latest.sgccaFeatureWeightedMatrixBlobId1, latest.sgccaFeatureWeightedMatrixBlobId2]);
       }
     } catch (err) {
-      onError(err instanceof ApiError ? err.message : "Could not load apply-weights results.");
+      onErrorRef.current(err instanceof ApiError ? err.message : "Could not load apply-weights results.");
     }
-  }, [experimentId, onComplete, onError]);
+  }, [experimentId]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useExperimentStepLoad(experimentId, load);
 
-  const latest = items[items.length - 1]?.designMatrixDefinedFeatureMatrix;
+  const latestItem = items.length > 0 ? items[items.length - 1] : null;
+  const latest = latestItem?.designMatrixDefinedFeatureMatrix ?? latestItem?.applySGCCAWeights;
 
   const handleGenerate = async () => {
     if (!datasetId || !designMatrixBlobIds || !weightsBlobId) {
@@ -109,8 +112,8 @@ export function ApplySgccaWeightsStep({
       {latest ? (
         <>
           <ApplyWeightsBlockChart outputs={latest.outputs ?? []} />
-          <OutputBlobCard label="Weighted matrix blob 1" blobId={items[items.length - 1]?.sgccaFeatureWeightedMatrixBlobId1} />
-          <OutputBlobCard label="Weighted matrix blob 2" blobId={items[items.length - 1]?.sgccaFeatureWeightedMatrixBlobId2} />
+          <OutputBlobCard label="Weighted matrix blob 1" blobId={latestItem?.sgccaFeatureWeightedMatrixBlobId1} />
+          <OutputBlobCard label="Weighted matrix blob 2" blobId={latestItem?.sgccaFeatureWeightedMatrixBlobId2} />
         </>
       ) : (
         <p className={styles.dropzoneHint}>No cached apply-weights results.</p>
