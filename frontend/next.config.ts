@@ -19,9 +19,9 @@ const nextConfig: NextConfig = {
   // are sent directly to the BFF in apiClient.ts to avoid buffering).
   experimental: {
     proxyClientMaxBodySize: "1gb",
-  },
-  serverActions: {
-    bodySizeLimit: "1gb",
+    serverActions: {
+      bodySizeLimit: "1gb",
+    },
   },
   async rewrites() {
     return [
