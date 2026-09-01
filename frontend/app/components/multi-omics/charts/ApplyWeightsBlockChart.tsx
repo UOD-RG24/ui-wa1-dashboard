@@ -98,7 +98,7 @@ export function DefinedMatrixComparisonChart({
   }
 
   return (
-    <div className={styles.chartFrame} aria-label="Defined matrix feature comparison">
+    <div className={styles.chartFrameExtraTall} aria-label="Defined matrix feature comparison">
       <Bar
         data={{
           labels: blocks.map((b) => b.label),

@@ -2,6 +2,186 @@
   scroll-margin-top: calc(24px * var(--ui-scale));
 }
 
+.workflowLayout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: calc(20px * var(--ui-scale));
+  align-items: start;
+}
+
+.stepsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: calc(16px * var(--ui-scale));
+  min-width: 0;
+}
+
+.verticalStepper {
+  position: sticky;
+  top: calc(16px * var(--ui-scale));
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  padding-top: calc(8px * var(--ui-scale));
+}
+
+.stepperItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: calc(10px * var(--ui-scale));
+  align-items: stretch;
+}
+
+.stepperNodeRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(20px * var(--ui-scale));
+  min-height: 100%;
+}
+
+.stepperDot {
+  display: grid;
+  place-items: center;
+  width: calc(18px * var(--ui-scale));
+  height: calc(18px * var(--ui-scale));
+  padding: 0;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.stepperDotInner {
+  width: calc(6px * var(--ui-scale));
+  height: calc(6px * var(--ui-scale));
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.2s;
+}
+
+.stepperDotActive {
+  border-color: #101d49;
+  background: #365b8f;
+}
+
+.stepperDotActive .stepperDotInner {
+  background: #fff;
+}
+
+.stepperDotComplete {
+  border-color: #16a34a;
+  background: #16a34a;
+}
+
+.stepperDotComplete .stepperDotInner {
+  background: #fff;
+}
+
+.stepperDotLocked {
+  border-color: #e2e8f0;
+  background: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.stepperLine {
+  width: 2px;
+  flex: 1;
+  min-height: calc(20px * var(--ui-scale));
+  margin: calc(4px * var(--ui-scale)) 0;
+  background: #dbe2ea;
+  transition: background 0.2s;
+}
+
+.stepperLineComplete {
+  background: #16a34a;
+}
+
+.stepperLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0 0 calc(20px * var(--ui-scale));
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stepperLabel:disabled {
+  cursor: not-allowed;
+}
+
+.stepperNumber {
+  font-size: calc(10px * var(--ui-scale));
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stepperName {
+  font-size: calc(12px * var(--ui-scale));
+  font-weight: 600;
+  color: var(--foreground);
+  line-height: 1.3;
+  max-width: calc(100px * var(--ui-scale));
+}
+
+.stepperLabelActive .stepperName {
+  color: #101d49;
+  font-weight: 700;
+}
+
+.stepperLabelLocked .stepperName,
+.stepperLabelLocked .stepperNumber {
+  color: #94a3b8;
+}
+
+@media (max-width: 900px) {
+  .workflowLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .verticalStepper {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: calc(8px * var(--ui-scale));
+  }
+
+  .stepperItem {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    min-width: calc(72px * var(--ui-scale));
+  }
+
+  .stepperNodeRow {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .stepperLine {
+    width: calc(24px * var(--ui-scale));
+    height: 2px;
+    min-height: 0;
+    margin: 0 calc(2px * var(--ui-scale));
+  }
+
+  .stepperLabel {
+    align-items: center;
+    padding-bottom: 0;
+    text-align: center;
+  }
+
+  .stepperName {
+    max-width: calc(64px * var(--ui-scale));
+    font-size: calc(10px * var(--ui-scale));
+  }
+}
+
 .stepContent {
   display: flex;
   flex-direction: column;
@@ -9,11 +189,7 @@
 }
 
 .stepperWrap {
-  margin-bottom: calc(20px * var(--ui-scale));
-  padding: calc(12px * var(--ui-scale));
-  background: var(--surface-strong, #f1f5f9);
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  display: none;
 }
 
 .datasetRow {
@@ -146,9 +322,14 @@
 
 .healthLayout {
   display: grid;
-  grid-template-columns: minmax(140px, 200px) 1fr;
+  grid-template-columns: 1fr 2fr;
   gap: calc(16px * var(--ui-scale));
-  align-items: start;
+  align-items: stretch;
+}
+
+.healthLayout .chartFramePie {
+  height: 100%;
+  min-height: calc(200px * var(--ui-scale));
 }
 
 @media (max-width: 720px) {
@@ -165,8 +346,34 @@
   background: var(--surface-subtle);
 }
 
+.chartFramePie {
+  height: 100%;
+  min-height: calc(180px * var(--ui-scale));
+}
+
 .chartFrameTall {
   height: calc(220px * var(--ui-scale));
+}
+
+.chartFrameExtraTall {
+  height: calc(320px * var(--ui-scale));
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: calc(8px * var(--ui-scale));
+  background: var(--surface-subtle);
+}
+
+.chartRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(16px * var(--ui-scale));
+  align-items: stretch;
+}
+
+@media (max-width: 720px) {
+  .chartRow {
+    grid-template-columns: 1fr;
+  }
 }
 
 .jsonTree {

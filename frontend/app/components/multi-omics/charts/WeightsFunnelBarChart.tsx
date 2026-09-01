@@ -13,7 +13,7 @@ export function WeightsFunnelBarChart({
   selectedFeatures?: number;
 }) {
   return (
-    <div className={styles.chartFrame} aria-label="Weights funnel">
+    <div className={styles.chartFrameExtraTall} aria-label="Weights funnel">
       <Bar
         data={{
           labels: ["Extracted", "Selected weights", "Selected features"],
@@ -36,7 +36,7 @@ export function WeightsFunnelBarChart({
 
 export function SparsityBarChart({ sparsity }: { sparsity: [number, number] }) {
   return (
-    <div className={styles.chartFrame} aria-label="Sparsity parameters">
+    <div className={styles.chartFrameExtraTall} aria-label="Sparsity parameters">
       <Bar
         data={{
           labels: ["Block 1", "Block 2"],

@@ -18,13 +18,14 @@ import {
 import { ApiError } from "./lib/apiClient";
 import type { ApiDataset, ApiExperiment, ApiUser } from "./lib/apiTypes";
 import { clearAuthSession } from "./lib/authStorage";
-import { mapDataset, mapExperiment, mapExperimentWorkflow } from "./lib/mappers";
+import { mapDataset, mapExperiment } from "./lib/mappers";
 import { InputModalModel } from "./models/modal";
 import { ToastModel } from "./models/toast";
-import type { DatasetItem, Experiment, MainView, WorkflowStep } from "./types";
+import type { DatasetItem, Experiment, MainView } from "./types";
 import { DatasetsPage } from "./views/DatasetsPage";
 import { ExperimentPage } from "./views/ExperimentPage";
 import { ProfilePage } from "./views/ProfilePage";
+import { TwinsPage } from "./views/TwinsPage";
 
 function sortExperiments(items: Experiment[]) {
   return [...items].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -38,13 +39,12 @@ function DashboardHome({ user }: { user: ApiUser }) {
   const router = useRouter();
   const { showToast, showModal } = useAppShell();
   const [mainView, setMainView] = useState<MainView>("experiment");
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [loading, setLoading] = useState(true);
   const [apiDatasets, setApiDatasets] = useState<ApiDataset[]>([]);
   const [apiExperiments, setApiExperiments] = useState<ApiExperiment[]>([]);
   const [selectedExperimentId, setSelectedExperimentId] = useState("");
   const [selectedDatasetId, setSelectedDatasetId] = useState("");
-  const [workflowByExperiment, setWorkflowByExperiment] = useState<Record<string, WorkflowStep[]>>({});
 
   const datasets = useMemo(() => sortDatasets(apiDatasets.map(mapDataset)), [apiDatasets]);
   const experiments = useMemo(() => sortExperiments(apiExperiments.map(mapExperiment)), [apiExperiments]);
@@ -66,11 +66,6 @@ function DashboardHome({ user }: { user: ApiUser }) {
     const [datasetRows, experimentRows] = await Promise.all([listDatasets(), listExperiments()]);
     setApiDatasets(datasetRows);
     setApiExperiments(experimentRows);
-    const workflows: Record<string, WorkflowStep[]> = {};
-    for (const row of experimentRows) {
-      workflows[row.id] = mapExperimentWorkflow(row);
-    }
-    setWorkflowByExperiment(workflows);
     setSelectedDatasetId((current) =>
       current && datasetRows.some((item) => item.id === current) ? current : datasetRows[0]?.id ?? "",
     );
@@ -329,6 +324,7 @@ function DashboardHome({ user }: { user: ApiUser }) {
         setMainView("dataset");
       }}
       onSelectProfile={() => setMainView("profile")}
+      onSelectTwins={() => setMainView("twins")}
       onSignOut={() => {
         void handleSignOut();
       }}
@@ -340,7 +336,6 @@ function DashboardHome({ user }: { user: ApiUser }) {
         <ExperimentPage
           experiment={selectedExperiment}
           datasets={datasets}
-          workflowSteps={workflowByExperiment[selectedExperiment.id]}
           onWorkflowRefresh={() => void refreshLists()}
         />
       ) : null}
@@ -355,6 +350,7 @@ function DashboardHome({ user }: { user: ApiUser }) {
         />
       ) : null}
       {mainView === "profile" ? <ProfilePage user={user} /> : null}
+      {mainView === "twins" && selectedExperiment ? <TwinsPage experiment={selectedExperiment} /> : null}
     </DashboardShell>
   );
 }

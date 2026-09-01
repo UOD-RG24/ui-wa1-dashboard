@@ -8,6 +8,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiDatabase,
+  FiGitBranch,
   FiHardDrive,
   FiLogOut,
   FiMenu,
@@ -30,6 +31,7 @@ export function DashboardShell({
   onSelectExperiment,
   onSelectDataset,
   onSelectProfile,
+  onSelectTwins,
   onSignOut,
   onCreateExperiment,
   onCreateDataset,
@@ -46,6 +48,7 @@ export function DashboardShell({
   onSelectExperiment: (id: string) => void;
   onSelectDataset: (id: string) => void;
   onSelectProfile: () => void;
+  onSelectTwins: () => void;
   onSignOut: () => void;
   onCreateExperiment?: () => void;
   onCreateDataset?: () => void;
@@ -57,9 +60,10 @@ export function DashboardShell({
   const [datasetsOpen, setDatasetsOpen] = useState(true);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const [autoRail, setAutoRail] = useState(false);
+  const [sidebarHovering, setSidebarHovering] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
-  const railMode = isCollapsed || autoRail;
+  const railMode = (isCollapsed || autoRail) && !sidebarHovering;
   const displayName = userName?.trim() || "User";
   const initials = displayName
     .split(/\s+/)
@@ -71,9 +75,11 @@ export function DashboardShell({
   const pageTitle =
     mainView === "profile"
       ? "Profile"
-      : mainView === "experiment"
-        ? experiments.find((item) => item.id === selectedExperimentId)?.name ?? "Experiment"
-        : datasets.find((item) => item.id === selectedDatasetId)?.name ?? "Dataset";
+      : mainView === "twins"
+        ? "Digital Twin"
+        : mainView === "experiment"
+          ? experiments.find((item) => item.id === selectedExperimentId)?.name ?? "Experiment"
+          : datasets.find((item) => item.id === selectedDatasetId)?.name ?? "Dataset";
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1280px) and (min-width: 901px)");
@@ -131,6 +137,8 @@ export function DashboardShell({
 
       <aside
         className={`${styles.appSidebar} ${railMode ? styles.collapsed : ""} ${mobileOpen ? styles.mobileOpen : ""}`}
+        onMouseEnter={() => setSidebarHovering(true)}
+        onMouseLeave={() => setSidebarHovering(false)}
       >
         <button type="button" className={styles.mobileClose} onClick={closeMobile} aria-label="Close menu">
           <FiX />
@@ -303,6 +311,21 @@ export function DashboardShell({
               </div>
             ) : null}
           </div>
+
+          <button
+            type="button"
+            className={`${styles.navFlat} ${mainView === "twins" ? styles.active : ""}`}
+            onClick={() => {
+              onSelectTwins();
+              closeMobile();
+            }}
+            data-tooltip={railMode ? "Digital Twin" : undefined}
+          >
+            <span className={styles.navIcon} aria-hidden="true">
+              <FiGitBranch />
+            </span>
+            {!railMode ? <span className={styles.navLabel}>Digital Twin</span> : null}
+          </button>
 
           <button
             type="button"

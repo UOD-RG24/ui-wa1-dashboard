@@ -1,7 +1,5 @@
 "use client";
 
-import { ProgressBar, Step } from "react-step-progress-bar";
-import "react-step-progress-bar/styles.css";
 import styles from "./MultiOmics.module.css";
 
 export const MULTI_OMICS_STEPS = [
@@ -23,52 +21,47 @@ export function WorkflowStepper({
   unlockedThrough: number;
   onStepClick: (step: number) => void;
 }) {
-  const percent = (activeStep / (MULTI_OMICS_STEPS.length - 1)) * 100;
-
   return (
-    <div className={styles.stepperWrap}>
-      <ProgressBar percent={percent} height={4} filledBackground="#101d49" unfilledBackground="#dbe2ea">
-        {MULTI_OMICS_STEPS.map((step) => {
-          const locked = step.id > unlockedThrough;
-          const active = step.id === activeStep;
-          const done = step.id < activeStep;
+    <nav className={styles.verticalStepper} aria-label="Workflow progress">
+      {MULTI_OMICS_STEPS.map((step, index) => {
+        const locked = step.id > unlockedThrough;
+        const active = step.id === activeStep;
+        const complete = step.id < unlockedThrough;
+        const isLast = index === MULTI_OMICS_STEPS.length - 1;
 
-          return (
-            <Step key={step.id}>
-              {() => (
-                <button
-                  type="button"
-                  disabled={locked}
-                  onClick={() => !locked && onStepClick(step.id)}
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: active || done ? "50%" : 4,
-                    border: "2px solid",
-                    borderColor: locked ? "#dbe2ea" : "#101d49",
-                    background: done ? "#101d49" : active ? "#365b8f" : "#e7edf4",
-                    color: done || active ? "#fff" : "#64748b",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    cursor: locked ? "not-allowed" : "pointer",
-                    marginTop: -12,
-                  }}
-                  title={locked ? `${step.label} (locked)` : step.label}
-                >
-                  {step.id + 1}
-                </button>
-              )}
-            </Step>
-          );
-        })}
-      </ProgressBar>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 11, color: "#64748b" }}>
-        {MULTI_OMICS_STEPS.map((s) => (
-          <span key={s.id} style={{ maxWidth: 72, textAlign: "center" }}>
-            {s.label}
-          </span>
-        ))}
-      </div>
-    </div>
+        return (
+          <div key={step.id} className={styles.stepperItem}>
+            <div className={styles.stepperNodeRow}>
+              <button
+                type="button"
+                className={`${styles.stepperDot} ${complete ? styles.stepperDotComplete : ""} ${active ? styles.stepperDotActive : ""} ${locked ? styles.stepperDotLocked : ""}`}
+                disabled={locked}
+                onClick={() => !locked && onStepClick(step.id)}
+                title={locked ? `${step.label} (locked)` : step.label}
+                aria-current={active ? "step" : undefined}
+                aria-label={`Step ${step.id + 1}: ${step.label}${complete ? " (complete)" : locked ? " (locked)" : ""}`}
+              >
+                <span className={styles.stepperDotInner} />
+              </button>
+              {!isLast ? (
+                <div
+                  className={`${styles.stepperLine} ${complete ? styles.stepperLineComplete : ""}`}
+                  aria-hidden="true"
+                />
+              ) : null}
+            </div>
+            <button
+              type="button"
+              className={`${styles.stepperLabel} ${active ? styles.stepperLabelActive : ""} ${locked ? styles.stepperLabelLocked : ""}`}
+              disabled={locked}
+              onClick={() => !locked && onStepClick(step.id)}
+            >
+              <span className={styles.stepperNumber}>Step {step.id + 1}</span>
+              <span className={styles.stepperName}>{step.label}</span>
+            </button>
+          </div>
+        );
+      })}
+    </nav>
   );
 }

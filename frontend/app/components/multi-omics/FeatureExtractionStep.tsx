@@ -129,12 +129,14 @@ export function FeatureExtractionStep({
               <p className={ui.metricValue}>{latest.totalColumnCount ?? "—"}</p>
             </div>
           </div>
-          <FeatureColumnDoughnutChart
-            featureCount={latest.featureCount}
-            excludedColumnCount={latest.excludedColumnCount}
-            totalColumnCount={latest.totalColumnCount}
-          />
-          <ProcessingStepsBarChart steps={latest.steps ?? []} />
+          <div className={styles.chartRow}>
+            <FeatureColumnDoughnutChart
+              featureCount={latest.featureCount}
+              excludedColumnCount={latest.excludedColumnCount}
+              totalColumnCount={latest.totalColumnCount}
+            />
+            <ProcessingStepsBarChart steps={latest.steps ?? []} />
+          </div>
           <FeatureNamesTable names={latest.featureNames ?? []} />
         </>
       ) : (

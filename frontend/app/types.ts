@@ -1,4 +1,4 @@
-export type MainView = "experiment" | "dataset" | "profile";
+export type MainView = "experiment" | "dataset" | "profile" | "twins";
 
 export type PatientNode = {
   id: string;

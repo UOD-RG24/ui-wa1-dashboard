@@ -23,7 +23,13 @@
   padding: calc(14px * var(--ui-scale)) calc(12px * var(--ui-scale));
   background: var(--nav-bg);
   color: #eef4fa;
-  transition: width 180ms ease, flex-basis 180ms ease, padding 180ms ease;
+  transition: width 200ms ease, flex-basis 200ms ease, padding 200ms ease, box-shadow 200ms ease;
+}
+
+.sidebarCollapsed .appSidebar:hover,
+.appSidebar.collapsed:hover {
+  z-index: 45;
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.18);
 }
 
 .sidebarCollapsed .appSidebar,

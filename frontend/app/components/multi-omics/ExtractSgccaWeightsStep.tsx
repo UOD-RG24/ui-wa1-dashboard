@@ -129,7 +129,7 @@ export function ExtractSgccaWeightsStep({
             selectedWeights={latest.selectedWeights}
             selectedFeatures={latest.selectedFeatures}
           />
-          <ProcessingStepsBarChart steps={latest.steps ?? []} />
+          <ProcessingStepsBarChart steps={latest.steps ?? []} extraTall />
           <OutputBlobCard label="sGCCA weights blob" blobId={latestItem?.sgccaWeightsMatrixBlobId} />
         </>
       ) : (

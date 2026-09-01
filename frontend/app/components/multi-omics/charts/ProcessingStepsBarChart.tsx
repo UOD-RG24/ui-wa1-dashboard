@@ -4,7 +4,7 @@ import { chartPrimary } from "../../../lib/chartTheme";
 import type { ProcessStep } from "../../../lib/multiOmicsTypes";
 import styles from "../MultiOmics.module.css";
 
-export function ProcessingStepsBarChart({ steps }: { steps?: ProcessStep[] }) {
+export function ProcessingStepsBarChart({ steps, extraTall = false }: { steps?: ProcessStep[]; extraTall?: boolean }) {
   const safeSteps = Array.isArray(steps) ? steps : [];
   const labels = safeSteps.map((s, i) => s.step ?? `Step ${i + 1}`);
   const values = safeSteps.map((s) => s.durationMs ?? 0);
@@ -17,8 +17,12 @@ export function ProcessingStepsBarChart({ steps }: { steps?: ProcessStep[] }) {
     );
   }
 
+  const frameClass = extraTall
+    ? styles.chartFrameExtraTall
+    : `${styles.chartFrame} ${styles.chartFrameTall}`;
+
   return (
-    <div className={`${styles.chartFrame} ${styles.chartFrameTall}`} aria-label="Processing step durations">
+    <div className={frameClass} aria-label="Processing step durations">
       <Bar
         data={{
           labels,

@@ -5,7 +5,7 @@ import styles from "../MultiOmics.module.css";
 
 export function RgccaHealthDoughnutChart({ healthy }: { healthy: boolean }) {
   return (
-    <div className={styles.chartFrame} aria-label="RGCCA service health">
+    <div className={`${styles.chartFrame} ${styles.chartFramePie}`} aria-label="RGCCA service health">
       <Doughnut
         data={{
           labels: ["Healthy", "Unhealthy"],

@@ -104,23 +104,25 @@ export function MultiOmicsIntegrationPanel({
 
   return (
     <Section title="Multi-Omics Integration">
-      <WorkflowStepper
-        activeStep={activeStep}
-        unlockedThrough={unlockedThrough}
-        onStepClick={scrollToStep}
-      />
-
       <DatasetSelect datasets={datasets} value={datasetId} onChange={setDatasetId} />
 
-      {MULTI_OMICS_STEPS.map((step) => (
-        <div
-          key={step.id}
-          ref={(el) => {
-            stepRefs.current[step.id] = el;
-          }}
-          className={styles.stepSection}
-        >
-          <Panel title={`Step ${step.id + 1}: ${step.label}`}>
+      <div className={styles.workflowLayout}>
+        <WorkflowStepper
+          activeStep={activeStep}
+          unlockedThrough={unlockedThrough}
+          onStepClick={scrollToStep}
+        />
+
+        <div className={styles.stepsColumn}>
+          {MULTI_OMICS_STEPS.map((step) => (
+            <div
+              key={step.id}
+              ref={(el) => {
+                stepRefs.current[step.id] = el;
+              }}
+              className={styles.stepSection}
+            >
+              <Panel title={`Step ${step.id + 1}: ${step.label}`}>
             {step.id === 0 ? (
               <div className={styles.stepContent}>
                 <BlobUploadDropzone
@@ -203,9 +205,11 @@ export function MultiOmicsIntegrationPanel({
                 onWorkflowRefresh={onWorkflowRefresh}
               />
             ) : null}
-          </Panel>
+              </Panel>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </Section>
   );
 }

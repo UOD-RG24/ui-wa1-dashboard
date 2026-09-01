@@ -19,7 +19,7 @@ export function BlockComparisonBarChart({
   }
 
   return (
-    <div className={styles.chartFrameTall} style={{ border: "1px solid var(--line)", borderRadius: 4, padding: 8 }}>
+    <div className={styles.chartFrameExtraTall} aria-label="Block comparison">
       <Bar
         data={{
           labels: blocks,
