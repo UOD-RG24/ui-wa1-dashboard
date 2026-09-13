@@ -87,9 +87,8 @@ export function MultiOmicsIntegrationPanel({
     let max = 0;
     if (blobs.length > 0) max = Math.max(max, 1);
     if (hasFeatureExtraction) max = Math.max(max, 2);
-    if (designMatrixBlobIds.length >= 2) max = Math.max(max, 3);
-    if (weightsBlobId) max = Math.max(max, 4);
-    if (weightedBlobIds) max = Math.max(max, 5);
+    if (designMatrixBlobIds.length >= 2) max = Math.max(max, 4);
+    if (weightsBlobId) max = Math.max(max, 5);
     if (weightedBlobIds) max = Math.max(max, 6);
     return max;
   }, [blobs.length, designMatrixBlobIds.length, hasFeatureExtraction, weightsBlobId, weightedBlobIds]);
@@ -104,6 +103,13 @@ export function MultiOmicsIntegrationPanel({
 
   return (
     <Section title="Multi-Omics Integration">
+      <p className={styles.dropzoneHint}>
+        How to run steps 1–7: upload <b>two</b> CSVs as experiment blobs (mRNA and CNA), each with a{" "}
+        <code>patient_id</code> column and numeric features. Step 3: generate feature extraction for{" "}
+        <b>each</b> blob. Step 4: Block 1 = first file, Block 2 = second file (must differ). Step 5
+        needs those two design matrices. Step 7 identifier column is <code>patient_id</code>; run once
+        per omics block if you need two finals for digital twins.
+      </p>
       <DatasetSelect datasets={datasets} value={datasetId} onChange={setDatasetId} />
 
       <div className={styles.workflowLayout}>
@@ -169,6 +175,7 @@ export function MultiOmicsIntegrationPanel({
                 onComplete={handleDesignMatrixComplete}
                 onError={notifyError}
                 onWorkflowRefresh={onWorkflowRefresh}
+                onBlobsChanged={() => void refreshBlobs()}
               />
             ) : null}
 

@@ -16,6 +16,10 @@ import styles from "./MultiOmics.module.css";
 import { VirtualizedFeatureCheckboxList } from "./VirtualizedFeatureCheckboxList";
 import { useExperimentStepLoad, useLatestRef } from "./useExperimentStepLoad";
 
+function uniqueBlobIds(items: CreateDefinedFeatureMatrixItem[]): string[] {
+  return [...new Set(items.map((item) => item.designMatrixBlobId).filter(Boolean) as string[])];
+}
+
 export function DefinedFeatureMatrixStep({
   experimentId,
   datasetId,
@@ -24,6 +28,7 @@ export function DefinedFeatureMatrixStep({
   onComplete,
   onError,
   onWorkflowRefresh,
+  onBlobsChanged,
 }: {
   experimentId: string;
   datasetId: string;
@@ -32,9 +37,11 @@ export function DefinedFeatureMatrixStep({
   onComplete: (blobIds: string[]) => void;
   onError: (message: string) => void;
   onWorkflowRefresh: () => void;
+  onBlobsChanged?: () => void;
 }) {
   const [items, setItems] = useState<CreateDefinedFeatureMatrixItem[]>([]);
-  const [blobId, setBlobId] = useState("");
+  const [block1BlobId, setBlock1BlobId] = useState("");
+  const [block2BlobId, setBlock2BlobId] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [generating, setGenerating] = useState(false);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
@@ -47,14 +54,15 @@ export function DefinedFeatureMatrixStep({
       const result = await getDefinedFeatureMatrix(experimentId);
       setItems(result);
       setLoadedAt(new Date().toLocaleString());
-      const ids = result.map((r) => r.designMatrixBlobId).filter(Boolean) as string[];
-      if (ids.length >= 2) onCompleteRef.current(ids);
+      onCompleteRef.current(uniqueBlobIds(result));
     } catch (err) {
       onErrorRef.current(err instanceof ApiError ? err.message : "Could not load defined matrix results.");
     }
   }, [experimentId]);
 
   useExperimentStepLoad(experimentId, load);
+
+  const designCount = uniqueBlobIds(items).length;
 
   const chartBlocks = useMemo(() => {
     return items.map((item, i) => {
@@ -67,9 +75,16 @@ export function DefinedFeatureMatrixStep({
     });
   }, [items, selected.size, availableFeatures.length]);
 
-  const handleGenerate = async (blockLabel: string) => {
+  const handleGenerate = async (block: 1 | 2) => {
+    const blobId = block === 1 ? block1BlobId : block2BlobId;
     if (!datasetId || !blobId) {
-      onError("Select a dataset and preprocessed matrix blob.");
+      onError(`Select a dataset and a Block ${block} preprocessed matrix blob.`);
+      return;
+    }
+    if (block1BlobId && block2BlobId && block1BlobId === block2BlobId) {
+      onError(
+        "Block 1 and Block 2 must use different omics files. Using the same blob replaces the previous design matrix.",
+      );
       return;
     }
     if (availableFeatures.length === 0) {
@@ -94,9 +109,10 @@ export function DefinedFeatureMatrixStep({
       });
       await syncMultiOmicsSection(experimentId, "Complete", {
         processingTimeMs: Date.now() - started,
-        notes: blockLabel,
+        notes: `Block ${block}`,
       });
       onWorkflowRefresh();
+      onBlobsChanged?.();
       await load();
     } catch (err) {
       await syncMultiOmicsSection(experimentId, "Failed", {
@@ -111,15 +127,34 @@ export function DefinedFeatureMatrixStep({
 
   return (
     <div className={styles.stepContent}>
+      <p className={styles.dropzoneHint}>
+        sGCCA needs two omics blocks. Generate Block 1 from mRNA (or similar) and Block 2 from a{" "}
+        <b>different</b> CNA file. Same file for both overwrites the first matrix.
+      </p>
+      <p className={styles.timestamp}>
+        {designCount} of 2 design matrices
+        {designCount < 2 ? " — Extract weights stays locked until both blocks exist." : " — Extract weights is unlocked."}
+      </p>
       <div className={styles.formGrid}>
-        <BlobSelect blobs={blobs} value={blobId} onChange={setBlobId} label="Preprocessed matrix blob" />
+        <BlobSelect
+          blobs={blobs}
+          value={block1BlobId}
+          onChange={setBlock1BlobId}
+          label="Block 1 preprocessed blob (e.g. mRNA)"
+        />
+        <BlobSelect
+          blobs={blobs}
+          value={block2BlobId}
+          onChange={setBlock2BlobId}
+          label="Block 2 preprocessed blob (e.g. CNA)"
+        />
       </div>
 
       <VirtualizedFeatureCheckboxList features={availableFeatures} selected={selected} onChange={setSelected} />
 
       {availableFeatures.length === 0 ? (
         <p className={styles.dropzoneHint}>
-          Feature list is empty. Complete Step 3 for the matching preprocessed blob, then scroll back here.
+          Feature list is empty. Complete Step 3 for each preprocessed blob, then scroll back here.
         </p>
       ) : null}
 
@@ -128,7 +163,7 @@ export function DefinedFeatureMatrixStep({
           type="button"
           className={styles.primaryBtn}
           disabled={generating}
-          onClick={() => void handleGenerate("Block 1")}
+          onClick={() => void handleGenerate(1)}
         >
           {generating ? <span className={styles.spinner} /> : null}
           Generate block 1 matrix
@@ -137,7 +172,7 @@ export function DefinedFeatureMatrixStep({
           type="button"
           className={styles.primaryBtn}
           disabled={generating}
-          onClick={() => void handleGenerate("Block 2")}
+          onClick={() => void handleGenerate(2)}
         >
           {generating ? <span className={styles.spinner} /> : null}
           Generate block 2 matrix
@@ -150,7 +185,7 @@ export function DefinedFeatureMatrixStep({
         <>
           <DefinedMatrixComparisonChart blocks={chartBlocks.length > 0 ? chartBlocks : [{ label: "Selection", selected: selected.size, total: availableFeatures.length }]} />
           {items.map((item, i) => (
-            <OutputBlobCard key={i} label={`Design matrix blob ${i + 1}`} blobId={item.designMatrixBlobId} />
+            <OutputBlobCard key={item.designMatrixBlobId ?? i} label={`Design matrix blob ${i + 1}`} blobId={item.designMatrixBlobId} />
           ))}
         </>
       ) : (
