@@ -350,7 +350,13 @@ function DashboardHome({ user }: { user: ApiUser }) {
         />
       ) : null}
       {mainView === "profile" ? <ProfilePage user={user} /> : null}
-      {mainView === "twins" && selectedExperiment ? <TwinsPage experiment={selectedExperiment} /> : null}
+      {mainView === "twins" && selectedExperiment ? (
+        <TwinsPage
+          experiment={selectedExperiment}
+          datasets={datasets}
+          onWorkflowRefresh={() => void refreshLists()}
+        />
+      ) : null}
     </DashboardShell>
   );
 }

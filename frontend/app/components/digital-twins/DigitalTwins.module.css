@@ -1,0 +1,104 @@
+.blobFieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.blobFieldset legend {
+  padding: 0;
+  margin-bottom: calc(6px * var(--ui-scale));
+  color: var(--muted);
+  font-size: calc(13px * var(--ui-scale));
+}
+
+.blobCheckList {
+  display: grid;
+  gap: calc(6px * var(--ui-scale));
+  max-height: 220px;
+  overflow: auto;
+  padding: calc(8px * var(--ui-scale));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.blobCheck {
+  display: flex;
+  gap: calc(8px * var(--ui-scale));
+  align-items: center;
+  color: var(--foreground);
+  font-size: calc(13px * var(--ui-scale));
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8px * var(--ui-scale));
+}
+
+.ghostBtn,
+.dangerBtn {
+  padding: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
+  border-radius: 4px;
+  font-size: calc(13px * var(--ui-scale));
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.ghostBtn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--foreground);
+}
+
+.ghostBtn:disabled,
+.dangerBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.dangerBtn {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.relList {
+  display: grid;
+  gap: calc(6px * var(--ui-scale));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.relList li {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(8px * var(--ui-scale));
+  font-size: calc(12px * var(--ui-scale));
+}
+
+.propertyEditor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px auto;
+  gap: calc(8px * var(--ui-scale));
+  align-items: end;
+}
+
+.propertyEditor label {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4px * var(--ui-scale));
+  color: var(--muted);
+  font-size: calc(12px * var(--ui-scale));
+}
+
+.propertyEditor input {
+  min-width: 0;
+  padding: calc(7px * var(--ui-scale)) calc(8px * var(--ui-scale));
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--foreground);
+}
