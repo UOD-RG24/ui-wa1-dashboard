@@ -41,6 +41,45 @@ export class ApiError extends Error {
   }
 }
 
+const TOAST_MESSAGE_MAX = 280;
+
+function looksLikeHtml(text: string): boolean {
+  const trimmed = text.trimStart();
+  return trimmed.startsWith("<") || /<!DOCTYPE/i.test(trimmed) || /<html[\s>]/i.test(trimmed);
+}
+
+function titleFromHtml(html: string): string | undefined {
+  const title = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1];
+  return title?.replace(/\s+/g, " ").trim() || undefined;
+}
+
+function clampMessage(text: string, max = TOAST_MESSAGE_MAX): string {
+  const oneLine = text.replace(/\s+/g, " ").trim();
+  if (oneLine.length <= max) return oneLine;
+  return `${oneLine.slice(0, Math.max(0, max - 1))}…`;
+}
+
+function errorMessageFromBody(parsed: unknown, status: number, statusText: string): string {
+  if (parsed && typeof parsed === "object" && "message" in parsed) {
+    const msg = (parsed as ApiErrorBody).message;
+    if (typeof msg === "string" && msg.trim()) {
+      if (looksLikeHtml(msg)) {
+        const title = titleFromHtml(msg);
+        return clampMessage(title ? `Request failed (${status}): ${title}` : `Request failed (${status})`);
+      }
+      return clampMessage(msg);
+    }
+  }
+  if (typeof parsed === "string" && parsed.trim()) {
+    if (looksLikeHtml(parsed)) {
+      const title = titleFromHtml(parsed);
+      return clampMessage(title ? `Request failed (${status}): ${title}` : `Request failed (${status})`);
+    }
+    return clampMessage(parsed);
+  }
+  return clampMessage(statusText || `Request failed (${status})`);
+}
+
 type ApiFetchOptions = Omit<RequestInit, "body"> & {
   body?: BodyInit | object | null;
   auth?: boolean;
@@ -94,11 +133,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
         parsed = raw;
       }
     }
-    const message =
-      (parsed as ApiErrorBody | null)?.message ??
-      (typeof parsed === "string" && parsed.trim() ? parsed.trim() : null) ??
-      response.statusText ??
-      `Request failed (${response.status})`;
+    const message = errorMessageFromBody(parsed, response.status, response.statusText);
     throw new ApiError(message, response.status, parsed);
   }
 
