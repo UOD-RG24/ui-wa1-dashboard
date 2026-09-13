@@ -51,6 +51,8 @@ export type ApiExperiment = {
   lastAccessedDateTime?: string | null;
   lastUpdatedDateTime?: string | null;
   status: string;
+  datasetIds?: string[];
+  blobIds?: string[];
   preprocessing: ExperimentSection;
   multiOmicsIntegration: ExperimentSection;
   training: ExperimentSection;

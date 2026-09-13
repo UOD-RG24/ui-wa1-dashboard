@@ -28,7 +28,7 @@ export function ExperimentPage({
     showToast(
       new ToastModel({
         title: "Dataset selection updated locally",
-        description: `UI link set to ${value}. Experiment↔dataset linking is not in the API yet.`,
+        description: `UI link set to ${value}. Create/update experiment still does not persist datasetIds.`,
         status: "info",
       }),
     );
@@ -48,6 +48,10 @@ export function ExperimentPage({
           <p className={ui.metricValue} style={{ fontSize: "calc(18px * var(--ui-scale))" }}>
             {selectedDataset || "—"}
           </p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Experiment blobs</p>
+          <p className={ui.metricValue}>{experiment.blobIds?.length ?? 0}</p>
         </div>
       </div>
 

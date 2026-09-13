@@ -14,6 +14,8 @@ export type Experiment = {
   dataset: string;
   updatedAt: string;
   status: string;
+  datasetIds?: string[];
+  blobIds?: string[];
 };
 
 export type DatasetItem = {

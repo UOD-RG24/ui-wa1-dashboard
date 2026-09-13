@@ -25,6 +25,8 @@ export function mapExperiment(api: ApiExperiment): Experiment {
     dataset: api.description?.trim() || "—",
     updatedAt: api.modifiedDateTime,
     status: api.status,
+    datasetIds: api.datasetIds ?? [],
+    blobIds: api.blobIds ?? [],
   };
 }
 
