@@ -73,6 +73,10 @@ export function PatientDtdlStep({
 
   return (
     <div className={moi.stepContent}>
+      <p className={moi.dropzoneHint}>
+        This model is created automatically after extract features (already-exists / 409 is OK). Re-run here only if
+        Azure is missing <code>dtmi:com:patient;1</code>.
+      </p>
       {!enabled ? (
         <p className={moi.dropzoneHint}>Extract features first so the Patient interface can be built.</p>
       ) : null}

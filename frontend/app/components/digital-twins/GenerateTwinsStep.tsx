@@ -78,7 +78,7 @@ export function GenerateTwinsStep({
 
   return (
     <div className={moi.stepContent}>
-      {!enabled ? <p className={moi.dropzoneHint}>Create the Patient DTDL model before generating twins.</p> : null}
+      {!enabled ? <p className={moi.dropzoneHint}>Extract features first. The Patient DTDL model is created automatically after that.</p> : null}
       <button
         type="button"
         className={moi.primaryBtn}

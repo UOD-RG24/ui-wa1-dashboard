@@ -11,14 +11,23 @@ import { useExperimentStepLoad, useLatestRef } from "../multi-omics/useExperimen
 import moi from "../multi-omics/MultiOmics.module.css";
 import ui from "../ui/Ui.module.css";
 import { BlobMultiSelect } from "./BlobMultiSelect";
+import styles from "./DigitalTwins.module.css";
+
+function blobLabel(blob: Blob | undefined, id: string) {
+  if (!blob) return id;
+  const ext = blob.extension ? `.${blob.extension.replace(/^\./, "")}` : "";
+  return `${blob.fileName ?? id}${ext}`;
+}
 
 export function ExtractFeaturesStep({
   experimentId,
   datasetId,
   blobs,
   selectedBlobIds,
+  moiFinalIds,
   onSelectedBlobIdsChange,
   onComplete,
+  onExtracted,
   onError,
   onWorkflowRefresh,
 }: {
@@ -26,8 +35,10 @@ export function ExtractFeaturesStep({
   datasetId: string;
   blobs: Blob[];
   selectedBlobIds: string[];
+  moiFinalIds: string[];
   onSelectedBlobIdsChange: (ids: string[]) => void;
   onComplete: () => void;
+  onExtracted: () => void;
   onError: (message: string) => void;
   onWorkflowRefresh: () => void;
 }) {
@@ -72,6 +83,7 @@ export function ExtractFeaturesStep({
       await syncDigitalTwinSection(experimentId, "Complete", { processingTimeMs: Date.now() - started });
       onWorkflowRefresh();
       await load();
+      onExtracted();
     } catch (err) {
       await syncDigitalTwinSection(experimentId, "Failed", {
         notes: err instanceof ApiError ? err.message : "Generate failed",
@@ -87,7 +99,24 @@ export function ExtractFeaturesStep({
 
   return (
     <div className={moi.stepContent}>
-      <BlobMultiSelect blobs={blobs} value={selectedBlobIds} onChange={onSelectedBlobIdsChange} />
+      {moiFinalIds.length > 0 ? (
+        <>
+          <p className={moi.timestamp}>MOI final selected matrices (auto-selected)</p>
+          <div className={styles.blobCheckList}>
+            {moiFinalIds.map((id) => (
+              <div key={id} className={styles.blobCheck}>
+                <span>{blobLabel(blobs.find((blob) => blob.id === id), id)}</span>
+              </div>
+            ))}
+          </div>
+          <details>
+            <summary className={moi.dropzoneHint}>Use other experiment blobs</summary>
+            <BlobMultiSelect blobs={blobs} value={selectedBlobIds} onChange={onSelectedBlobIdsChange} />
+          </details>
+        </>
+      ) : (
+        <BlobMultiSelect blobs={blobs} value={selectedBlobIds} onChange={onSelectedBlobIdsChange} />
+      )}
       <button type="button" className={moi.primaryBtn} onClick={() => void handleGenerate()} disabled={generating}>
         {generating ? <span className={moi.spinner} /> : null}
         Extract features

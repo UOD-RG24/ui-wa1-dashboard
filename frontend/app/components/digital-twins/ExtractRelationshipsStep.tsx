@@ -81,6 +81,9 @@ export function ExtractRelationshipsStep({
   return (
     <div className={moi.stepContent}>
       {!enabled ? <p className={moi.dropzoneHint}>Generate twins before extracting relationships.</p> : null}
+      <p className={moi.dropzoneHint}>
+        Defaults to the first MOI final selected matrix and cosine threshold 0.80.
+      </p>
       <div className={moi.formGrid}>
         <BlobSelect
           blobs={blobs}

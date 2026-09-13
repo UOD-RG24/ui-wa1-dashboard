@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAppShell } from "../providers/AppProviders";
 import { ApiError } from "../../lib/apiClient";
-import { getDtFeatureExtraction, getPatientDtdl, getPatientTwinsCache } from "../../lib/digitalTwinsApi";
+import { getDtFeatureExtraction, generatePatientDtdl, getPatientDtdl, getPatientTwinsCache } from "../../lib/digitalTwinsApi";
 import type { DtGenerateRelationshipsItem, DtGenerateTwinsItem } from "../../lib/digitalTwinsTypes";
 import { getFinalSelectedMatrix, listExperimentBlobs } from "../../lib/multiOmicsApi";
 import type { Blob } from "../../lib/multiOmicsTypes";
@@ -34,6 +34,7 @@ export function DigitalTwinsPanel({
   const [datasetId, setDatasetId] = useState(datasets[0]?.id ?? "");
   const [blobs, setBlobs] = useState<Blob[]>([]);
   const [selectedBlobIds, setSelectedBlobIds] = useState<string[]>([]);
+  const [moiFinalIds, setMoiFinalIds] = useState<string[]>([]);
   const [processedBlobId, setProcessedBlobId] = useState("");
   const [hasFeatures, setHasFeatures] = useState(false);
   const [hasDtdl, setHasDtdl] = useState(false);
@@ -67,6 +68,7 @@ export function DigitalTwinsPanel({
       const finalIds = finals
         .map((item) => item.finalSelectedMatrixBlobId)
         .filter((id): id is string => Boolean(id));
+      setMoiFinalIds(finalIds);
       setSelectedBlobIds((prev) => (prev.length > 0 ? prev : finalIds));
       setProcessedBlobId((prev) => prev || finalIds[0] || "");
     } catch (err) {
@@ -82,6 +84,15 @@ export function DigitalTwinsPanel({
     if (!datasetId && datasets[0]?.id) setDatasetId(datasets[0].id);
   }, [datasetId, datasets]);
 
+  const ensureDtdl = useCallback(async () => {
+    try {
+      await generatePatientDtdl(experimentId);
+      setHasDtdl(true);
+    } catch (err) {
+      notifyError(err instanceof ApiError ? err.message : "Could not create the Patient DTDL model.");
+    }
+  }, [experimentId, notifyError]);
+
   useEffect(() => {
     void (async () => {
       try {
@@ -93,21 +104,21 @@ export function DigitalTwinsPanel({
         setHasFeatures(Boolean(features));
         setHasDtdl(Boolean(dtdl));
         setTwinsItem(twins);
+        if (features && !dtdl) await ensureDtdl();
       } catch {
         /* GET 404s are handled in the client */
       }
     })();
-  }, [experimentId]);
+  }, [ensureDtdl, experimentId]);
 
   const unlockedThrough = useMemo(() => {
     let max = 0;
-    if (hasFeatures) max = Math.max(max, 1);
-    if (hasDtdl) max = Math.max(max, 2);
+    if (hasFeatures) max = Math.max(max, 2);
     if (twinsItem) max = Math.max(max, 3);
     if (relationshipsItem) max = Math.max(max, 4);
     if (twinsItem) max = Math.max(max, 5);
     return max;
-  }, [hasDtdl, hasFeatures, processedBlobId, relationshipsItem, twinsItem]);
+  }, [hasFeatures, relationshipsItem, twinsItem]);
 
   const scrollToStep = (step: number) => {
     setActiveStep(step);
@@ -116,6 +127,18 @@ export function DigitalTwinsPanel({
 
   return (
     <Section title="Digital twins">
+      <p className={moi.dropzoneHint}>
+        Twins consume MOI <b>final selected matrices</b> (CSV with a <code>patient_id</code> column and numeric
+        features). Extract features, then generate twins — the Patient DTDL model is created automatically
+        (already-exists is OK).
+      </p>
+      {moiFinalIds.length > 0 ? (
+        <p className={moi.timestamp}>MOI final matrix blobs: {moiFinalIds.join(", ")}</p>
+      ) : (
+        <p className={moi.dropzoneHint}>
+          No MOI final selected matrix found yet. Finish Experiment step 7 or pick blobs below.
+        </p>
+      )}
       {blobs.length === 0 ? (
         <p className={moi.dropzoneHint}>
           No experiment blobs yet. Complete multi-omics (final selected matrix) on the Experiment page first.
@@ -140,8 +163,13 @@ export function DigitalTwinsPanel({
                     datasetId={datasetId}
                     blobs={blobs}
                     selectedBlobIds={selectedBlobIds}
+                    moiFinalIds={moiFinalIds}
                     onSelectedBlobIdsChange={setSelectedBlobIds}
                     onComplete={() => setHasFeatures(true)}
+                    onExtracted={() => {
+                      setHasFeatures(true);
+                      void ensureDtdl();
+                    }}
                     onError={notifyError}
                     onWorkflowRefresh={onWorkflowRefresh}
                   />
@@ -159,7 +187,7 @@ export function DigitalTwinsPanel({
                     experimentId={experimentId}
                     datasetId={datasetId}
                     selectedBlobIds={selectedBlobIds}
-                    enabled={hasDtdl}
+                    enabled={hasFeatures}
                     onComplete={(item) => {
                       setTwinsItem(item);
                       setGraphRefreshKey((value) => value + 1);
