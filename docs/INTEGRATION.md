@@ -11,6 +11,8 @@ Browser → /api/* → Next rewrite (DASHBOARD_BFF_URL) → Nest BFF → CORE_AP
 Locally, `DASHBOARD_BFF_URL` defaults to `http://127.0.0.1:3001`.  
 Until Nest is deployed, production may rewrite directly to `core-wa1-api` (same resource paths).
 
+Nested experiment routes (multi-omics and digital twins, including `PATCH`) are forwarded by the Nest experiments catch-all.
+
 | Env var | Where | Role |
 |---------|-------|------|
 | `NEXT_PUBLIC_API_BASE_URL` | Frontend | Client base path (`/api`) |
@@ -27,7 +29,8 @@ See `frontend/next.config.ts`, `backend/.env.example`, and [AUTH.md](./AUTH.md).
 | Microsoft SSO | Browser MSAL → Nest exchange (or core microsoft endpoints) → LocalJwt |
 | Profile | Name, email, role from `/auth/status` `user` |
 | Datasets | List, detail metadata, multipart upload, rename, download, delete |
-| Experiments | List, select, create; workflow panels from section statuses |
+| Experiments | List, select, create; multi-omics wizard |
+| Digital twins | Feature extract → DTDL → generate twins → extract/generate relationships → live React Flow graph, inspect, PATCH, DELETE, export |
 
 ### Dataset endpoints
 
@@ -48,18 +51,44 @@ See `frontend/next.config.ts`, `backend/.env.example`, and [AUTH.md](./AUTH.md).
 | Get | `GET` | `/experiments/get/{id}` |
 | Create | `POST` | `/experiments/create` |
 | Soft delete | `DELETE` | `/experiments/delete/{id}` |
+| Blob metadata | `GET` | `/experiments/get/{id}/blobs/get/{blobId}` |
 
-Workflow UI maps these section objects when present: `preprocessing`, `multiOmicsIntegration`, `training`, `evaluation`, `digitalTwin`.
+The experiment document now includes `datasetIds` and `blobIds`. `blobIds` is written on experiment blob upload. **Create/update still do not accept `datasetIds`**, so the Experiment page dataset dropdown remains local-only.
+
+### Digital twin endpoints
+
+Prefix: `/experiments/get/{experimentId}/digital-twins/`
+
+| Action | Method | Path |
+|--------|--------|------|
+| Extract features | `POST` / `GET` | `extract-features/{generate\|get}` |
+| Patient DTDL | `POST` / `GET` / `DELETE` | `patient-dtdl/{generate\|get\|delete}` |
+| Generate twins | `POST` | `patient-twins/generate` |
+| List twins | `GET` | `patient-twins/get/all/{cache\|live}` |
+| One twin | `GET` / `PATCH` / `DELETE` | `patient-twins/get/twin/{patientId}` (+ `/update`, `/delete`) |
+| Delete all twins | `DELETE` | `patient-twins/delete-all` |
+| Export twins | `POST` | `patient-twins/export/live` |
+| Twin relationships | `GET` | `patient-twins/get/twin/{id}/relationships/{incoming\|outgoing\|all}` |
+| Extract pairs | `POST` | `patient-relationships/extract` |
+| Cached / live pairs | `GET` | `patient-relationships/get/{processedBlobId}/{cache\|live}` |
+| Generate / delete named | `POST` / `DELETE` | `.../generate\|delete/{relationshipName}/max/{max}` |
+| One relationship | `GET` / `PATCH` / `DELETE` | `patient-relationships/get/{sourceTwinId}/{relationshipId}` |
+| Export relationships | `POST` | `patient-relationships/export/live` |
+
+Digital-twin generate calls take `datasetId` in the JSON body (same pattern as multi-omics). Twins consume final-selected matrix blobs from the multi-omics step.
+
+Core `89a7cb1` streams experiment blob uploads without double-buffering. Dashboard upload size limits were already raised. Large (~252MB) uploads still require that commit on the **deployed** Azure API.
 
 ## Still mock / local-only
 
 - Omics layer matrix previews and heatmaps on the dataset page
-- Digital twin React Flow graph (patient nodes)
-- Experiment ↔ dataset linking (API has no `datasetId` yet; the select box is UI-only)
+- Experiment ↔ dataset linking cannot be persisted (create/update have no `datasetIds`)
 
 ## Frontend helpers
 
-- `frontend/app/lib/api.ts` — endpoint wrappers
+- `frontend/app/lib/api.ts` — auth / datasets / experiments wrappers
+- `frontend/app/lib/multiOmicsApi.ts` — blobs + multi-omics
+- `frontend/app/lib/digitalTwinsApi.ts` — digital twins
 - `frontend/app/lib/apiTypes.ts` — response shapes
 - `frontend/app/lib/mappers.ts` — API → dashboard view models
 - `frontend/app/lib/msal.ts` — Microsoft login token acquisition
@@ -71,3 +100,4 @@ Workflow UI maps these section objects when present: `preprocessing`, `multiOmic
 1. Copy env examples and set `CORE_API_URL` + Azure AD public vars (see [AUTH.md](./AUTH.md)).
 2. From repo root: `npm install && npm run dev` (starts Nest + Next).
 3. Sign up / sign in on `/login` (JWT or Microsoft when configured), then use **Upload dataset** and **New experiment**.
+4. Run multi-omics through **final matrix**, then open **Twins** to generate the patient graph.
