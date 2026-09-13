@@ -142,6 +142,10 @@ export class ExperimentsController {
     );
   }
 
+  /**
+   * Forwards nested experiment routes (multi-omics + digital-twins), including PATCH.
+   * Explicit routes above take precedence; this must stay last.
+   */
   @All('*path')
   async catchAll(@Req() req: Request, @Res() res: Response): Promise<void> {
     const suffix = req.path.replace(/^\/experiments/, '') || '/';
