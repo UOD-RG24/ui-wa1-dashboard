@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FiActivity, FiChevronLeft, FiChevronRight, FiDatabase, FiHardDrive, FiLogOut, FiUser } from "react-icons/fi";
-import data from "../../data/dashboard.json";
 import type { DatasetItem, Experiment, MainView } from "../../types";
 import derbyLogo from "../../university-of-derby-logo-01.webp";
 import styles from "./DashboardShell.module.css";
@@ -16,10 +15,10 @@ function sortByLatestDatasets(items: DatasetItem[]) {
   return [...items].sort((left, right) => new Date(right.updated).getTime() - new Date(left.updated).getTime());
 }
 
-const experiments = sortByLatestExperiments(data.experiments as Experiment[]);
-const datasets = sortByLatestDatasets(data.datasets as DatasetItem[]);
-
 export function DashboardShell({
+  experiments: unsortedExperiments,
+  datasets: unsortedDatasets,
+  demoMode,
   mainView,
   selectedExperimentId,
   selectedDatasetId,
@@ -31,6 +30,9 @@ export function DashboardShell({
   onSignOut,
   children,
 }: {
+  experiments: Experiment[];
+  datasets: DatasetItem[];
+  demoMode: boolean;
   mainView: MainView;
   selectedExperimentId: string;
   selectedDatasetId: string;
@@ -42,6 +44,8 @@ export function DashboardShell({
   onSignOut: () => void;
   children: React.ReactNode;
 }) {
+  const experiments = sortByLatestExperiments(unsortedExperiments);
+  const datasets = sortByLatestDatasets(unsortedDatasets);
   const activeExperiment = experiments.find((item) => item.id === selectedExperimentId) ?? experiments[0];
   const activeDataset = datasets.find((item) => item.id === selectedDatasetId) ?? datasets[0];
 
@@ -88,6 +92,7 @@ export function DashboardShell({
                 ) : null}
               </button>
             ))}
+            {!experiments.length && !isCollapsed ? <span className={styles.emptyList}>No experiments yet</span> : null}
           </nav>
         </div>
 
@@ -117,6 +122,7 @@ export function DashboardShell({
                 ) : null}
               </button>
             ))}
+            {!datasets.length && !isCollapsed ? <span className={styles.emptyList}>No datasets yet</span> : null}
           </nav>
         </div>
       </aside>
@@ -146,6 +152,13 @@ export function DashboardShell({
         </header>
 
         <main className={styles.dashboardMain}>
+          {demoMode ? (
+            <div className={styles.demoBanner} role="status">
+              <strong>Demo data</strong>
+              <span>Fixtures are isolated from live records and cannot start a pipeline.</span>
+              <Link href="/">Return to live data</Link>
+            </div>
+          ) : null}
           <header className={styles.topbar}>
             <h1>{pageTitle}</h1>
           </header>
@@ -160,5 +173,3 @@ export function DashboardShell({
     </div>
   );
 }
-
-export { experiments, datasets };

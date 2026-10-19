@@ -146,6 +146,12 @@
   color: var(--muted);
 }
 
+.emptyList {
+  color: rgba(238, 244, 250, 0.62);
+  padding: 8px 10px;
+  font-size: 11px;
+}
+
 .mainColumn {
   min-width: 0;
   display: grid;
@@ -217,6 +223,24 @@
 .dashboardMain {
   min-width: 0;
   background: var(--background);
+}
+
+.demoBanner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  border-bottom: 1px solid #d7b96a;
+  background: #fff4cf;
+  color: #5c4811;
+  padding: 10px 28px;
+  font-size: 12px;
+}
+
+.demoBanner a {
+  margin-left: auto;
+  color: inherit;
+  font-weight: 800;
 }
 
 .topbar {

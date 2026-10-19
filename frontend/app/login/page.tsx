@@ -1,20 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import derbyLogo from "../university-of-derby-logo-01.webp";
+import { LoginForm } from "./LoginForm";
 import styles from "./LoginPage.module.css";
 
-function MicrosoftMark() {
-  return (
-    <span className={styles.microsoftIcon} aria-hidden="true">
-      <span />
-      <span />
-      <span />
-      <span />
-    </span>
-  );
-}
-
 export default function LoginPage() {
+  const microsoftEnabled = Boolean(
+    process.env.AUTH_MICROSOFT_ENTRA_ID_ID &&
+      process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET &&
+      process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID,
+  );
+  const localEnabled = process.env.NODE_ENV !== "production" && process.env.ALLOW_LOCAL_AUTH === "true";
   return (
     <main className={styles.loginPage}>
       <div className={styles.loginCenter}>
@@ -30,40 +26,10 @@ export default function LoginPage() {
             <h2 id="login-title">Sign in</h2>
           </div>
 
-          <form className={styles.loginForm}>
-            <button className={styles.ssoButton} type="button">
-              <MicrosoftMark />
-              Sign-In / Sign-Up using Microsoft
-            </button>
-
-            <div className={styles.divider}>or</div>
-
-            <div className={styles.fieldGroup}>
-              <label>
-                Email address
-                <input type="email" name="email" autoComplete="email" placeholder="name@derby.ac.uk" />
-              </label>
-              <label>
-                Password
-                <input type="password" name="password" autoComplete="current-password" />
-              </label>
-            </div>
-
-            <div className={styles.formOptions}>
-              <label className={styles.remember}>
-                <input type="checkbox" name="remember" />
-                Keep me signed in
-              </label>
-              <Link href="/login">Forgot password?</Link>
-            </div>
-
-            <button className={styles.secondaryButton} type="submit">
-              Sign in
-            </button>
-          </form>
+          <LoginForm microsoftEnabled={microsoftEnabled} localEnabled={localEnabled} />
 
           <div className={styles.panelFooter}>
-            Need access? <Link className={styles.supportLink} href="/login">Contact your workspace administrator</Link>.
+            Need a non-production preview? <Link className={styles.supportLink} href="/?mode=demo">Open isolated demo data</Link>.
           </div>
         </section>
       </div>

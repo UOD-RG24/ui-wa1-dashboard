@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Genome dashboard frontend
 
-## Getting Started
+Next.js/React dashboard for authenticated experiments, streaming dataset upload, hosted pipeline runs and run-scoped live digital twins. Local fixtures are isolated behind `/?mode=demo`.
 
-First, run the development server:
+## Local development
 
-```bash
+From this directory:
+
+```sh
+npm install
+npm run lint
+npm test
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Copy [`.env.example`](.env.example) to a private local environment file. Default address: `http://localhost:3000`. `npm run build` creates the production build and `npm start` serves it. `npm run test:e2e` runs the Auth.js/pipeline acceptance flow against the bundled mock core API after Playwright Chromium is installed.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Start with [auth.ts](auth.ts), [app/api/core](app/api/core), [app/page.tsx](app/page.tsx), and [LiveExperimentPage](app/views/live/LiveExperimentPage.tsx). Follow [AGENTS.md](AGENTS.md) and the installed Next.js documentation before code changes. The core authentication/data API is the separate .NET service; the Nest scaffold is outside the execution path.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Dashboard behavior and source map](../docs/dashboard-guide.md)
+- [Customer-facing biological overview](../../docs/project-overview.md)
+- [Implemented architecture](../../docs/engineering/architecture.md)
+- [Current API and data contracts](../../docs/engineering/data-and-api-contracts.md)
+- [Azure dashboard and pipeline setup](../../docs/azure/setup.md)
+- [Complete runnable demonstration](../../docs/demo-runbook.md)

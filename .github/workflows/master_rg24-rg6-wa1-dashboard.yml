@@ -26,24 +26,22 @@ jobs:
         with:
           node-version: "24.x"
           cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            frontend/package-lock.json
-            backend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: |
-          npm ci
-          npm ci --prefix frontend
-          npm ci --prefix backend
+        run: npm ci --prefix frontend
 
-      - name: Build application
+      - name: Verify frontend
         run: |
+          npm run lint --prefix frontend
+          npm test --prefix frontend
           npm run build --prefix frontend
-          npm run build --prefix backend
 
-      - name: Run tests
-        run: npm run test --if-present
+      - name: Browser acceptance
+        run: |
+          cd frontend
+          npx playwright install --with-deps chromium
+          npm run test:e2e
 
       - name: Prepare production frontend dependencies
         run: |

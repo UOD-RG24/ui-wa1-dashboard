@@ -205,6 +205,24 @@
   text-align: center;
 }
 
+.authNotice,
+.authError {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  padding: 11px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.authError {
+  border-color: #d4a18c;
+  background: var(--hot-soft);
+  color: #713a24;
+}
+
 @media (max-width: 520px) {
   .loginPage {
     padding: 18px;
