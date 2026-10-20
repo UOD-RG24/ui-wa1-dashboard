@@ -1,23 +1,24 @@
 .section {
-  margin-bottom: 24px;
+  margin-bottom: calc(20px * var(--ui-scale));
 }
 
 .section > h2 {
-  margin: 0 0 10px;
-  color: #435166;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0;
+  margin: 0 0 calc(10px * var(--ui-scale));
+  color: var(--muted);
+  font-size: calc(12px * var(--ui-scale));
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .panel {
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   background: var(--surface);
-  padding: 15px;
-  box-shadow: none;
+  padding: calc(14px * var(--ui-scale));
+  box-shadow: var(--shadow-soft);
 }
 
 .panel:hover {
@@ -34,8 +35,8 @@
 
 .panel h3 {
   margin: 0;
-  color: var(--navy);
-  font-size: 14px;
+  color: var(--foreground);
+  font-size: calc(14px * var(--ui-scale));
   font-weight: 800;
 }
 
@@ -44,20 +45,20 @@
   border-radius: 999px;
   background: var(--surface-strong);
   color: #506074;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-scale));
   font-weight: 750;
   padding: 4px 8px;
 }
 
 .panel p {
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-scale));
   line-height: 1.45;
 }
 
 .grid {
   display: grid;
-  gap: 14px;
+  gap: calc(14px * var(--ui-scale));
 }
 
 .two {
@@ -72,18 +73,165 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.metricStrip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.metricCell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: calc(14px * var(--ui-scale));
+  border-right: 1px solid var(--line);
+  min-width: 0;
+}
+
+.metricCell:last-child {
+  border-right: 0;
+}
+
+.metricLabel {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(11px * var(--ui-scale));
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.metricValue {
+  margin: 0;
+  color: var(--accent);
+  font-size: calc(28px * var(--ui-scale));
+  font-weight: 850;
+  line-height: 1;
+}
+
+.metricDetail {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--ui-scale));
+}
+
+.unifiedBoard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.unifiedRow {
+  display: flex;
+  min-height: 0;
+}
+
+.unifiedZone {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  padding: calc(14px * var(--ui-scale));
+  border-right: 1px solid var(--line);
+}
+
+.unifiedZone:last-child {
+  border-right: 0;
+}
+
+.unifiedZoneWide {
+  flex: 1.4 1 0;
+}
+
+.zoneLabel {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: calc(11px * var(--ui-scale));
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.zoneBody {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.zoneFooter {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: calc(12px * var(--ui-scale));
+}
+
+.filterWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+  gap: calc(14px * var(--ui-scale));
+  align-items: stretch;
+  min-height: 0;
+  height: 100%;
+}
+
+.filterMain {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.filterPanel {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12px * var(--ui-scale));
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  padding: calc(14px * var(--ui-scale));
+}
+
+.filterTitle {
+  margin: 0;
+  color: var(--accent);
+  font-size: calc(12px * var(--ui-scale));
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.filterHint {
+  margin: 0;
+  color: var(--muted);
+  font-size: calc(12px * var(--ui-scale));
+}
+
+.filterActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   align-items: end;
   justify-content: space-between;
-  margin-bottom: 22px;
+  margin-bottom: calc(18px * var(--ui-scale));
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   background: var(--surface);
-  padding: 12px;
-  box-shadow: none;
+  padding: calc(12px * var(--ui-scale));
+  box-shadow: var(--shadow-soft);
 }
 
 .toolbarGroup {
@@ -104,11 +252,11 @@
 
 .button,
 .primaryAction {
-  min-height: 38px;
+  min-height: calc(38px * var(--ui-scale));
   border: 1px solid var(--line-strong);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
-  color: var(--navy);
+  color: var(--accent);
   padding: 9px 14px;
   font-weight: 750;
 }
@@ -119,8 +267,8 @@
 }
 
 .primaryAction {
-  border-color: var(--navy);
-  background: var(--navy);
+  border-color: var(--accent);
+  background: var(--accent);
   color: #ffffff;
 }
 
@@ -142,14 +290,15 @@
 .tableWrap {
   overflow: auto;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
 }
 
 .tableWrap table {
   width: 100%;
   border-collapse: collapse;
   background: var(--surface);
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-scale));
 }
 
 .tableWrap th,
@@ -170,7 +319,7 @@
 
 .tableWrap th {
   color: #526174;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-scale));
   font-weight: 850;
   text-transform: uppercase;
   background: var(--surface-strong);
@@ -202,16 +351,61 @@
 
 @media (max-width: 1180px) {
   .four,
-  .three {
+  .three,
+  .metricStrip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metricCell:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .metricCell:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  .filterWorkspace {
+    grid-template-columns: 1fr;
+  }
+
+  .filterPanel {
+    order: -1;
+  }
+
+  .unifiedRow {
+    flex-wrap: wrap;
+  }
+
+  .unifiedZone {
+    flex: 1 1 45%;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
   }
 }
 
 @media (max-width: 900px) {
   .two,
   .three,
-  .four {
+  .four,
+  .metricStrip {
     grid-template-columns: 1fr;
+  }
+
+  .metricCell {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .metricCell:last-child {
+    border-bottom: 0;
+  }
+
+  .metricCell:nth-child(n + 3) {
+    border-top: 0;
+  }
+
+  .unifiedZone {
+    flex: 1 1 100%;
   }
 
   .toolbar {

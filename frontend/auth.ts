@@ -109,7 +109,7 @@ if (process.env.NODE_ENV !== "production" && process.env.ALLOW_LOCAL_AUTH === "t
 
 export const authConfig = {
   providers,
-  pages: { signIn: "/login" },
+  pages: { signIn: "/pipeline/login" },
   session: { strategy: "jwt", maxAge: 55 * 60 },
   callbacks: {
     async jwt({ token, user, account }) {

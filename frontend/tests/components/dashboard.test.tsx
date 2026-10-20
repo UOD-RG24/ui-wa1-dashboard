@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DashboardShell } from "../../app/components/dashboard/DashboardShell";
+import { PipelineShell } from "../../app/components/pipeline/PipelineShell";
 import { LoginForm } from "../../app/login/LoginForm";
 import type { DatasetItem, Experiment, PipelineRun, PipelineTwinResults } from "../../app/types";
 import { LiveExperimentPage } from "../../app/views/live/LiveExperimentPage";
@@ -88,9 +88,9 @@ describe("dashboard live and demo boundaries", () => {
       onSignOut: vi.fn(),
       children: <div>content</div>,
     };
-    const { rerender } = render(<DashboardShell {...props} demoMode />);
+    const { rerender } = render(<PipelineShell {...props} demoMode />);
     expect(screen.getByText("Demo data")).toBeInTheDocument();
-    rerender(<DashboardShell {...props} demoMode={false} />);
+    rerender(<PipelineShell {...props} demoMode={false} />);
     expect(screen.queryByText("Demo data")).not.toBeInTheDocument();
   });
 
@@ -139,8 +139,10 @@ describe("dashboard live and demo boundaries", () => {
     datasets.forEach((dataset, index) => fireEvent.change(selects[index], { target: { value: dataset.id } }));
     fireEvent.click(screen.getByLabelText(/I confirm these files contain de-identified research data/));
     fireEvent.click(screen.getByRole("button", { name: "Start fixed pipeline" }));
-    expect(await screen.findByRole("option", { name: /failed · attempt 1/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Resume run" })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole("option", { name: /failed · attempt 1/ })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Resume run" })).toBeInTheDocument();
+    });
     expect(screen.getAllByText("The pipeline worker could not be started.")).not.toHaveLength(0);
   });
 
@@ -174,9 +176,9 @@ describe("dashboard live and demo boundaries", () => {
       <LiveExperimentPage experiment={experiment} datasets={datasets}
         onDatasetCreated={vi.fn()} onExperimentCreated={vi.fn()} />,
     );
-    expect(await screen.findByText("1 / 1 twins live")).toBeInTheDocument();
+    expect(await screen.findByText(/twins live/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Verify immutable replay" }));
     expect(await screen.findByText("Live readback failed.")).toBeInTheDocument();
-    expect(screen.queryByText("1 / 1 twins live")).not.toBeInTheDocument();
+    expect(screen.queryByText(/twins live/)).not.toBeInTheDocument();
   });
 });

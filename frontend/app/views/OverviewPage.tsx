@@ -1,4 +1,5 @@
 import data from "../data/dashboard.json";
+import { PageShell } from "../components/dashboard/PageShell";
 import { StageSparkline } from "../components/charts/StageSparkline";
 import { Panel } from "../components/ui/Panel";
 import { Section } from "../components/ui/Section";
@@ -17,44 +18,83 @@ function RingMetric({ value, label }: { value: number; label: string }) {
 
 export function OverviewPage() {
   return (
-    <>
+    <PageShell category="Overview" title="Workspace monitor">
       <Toolbar />
-      <div className={styles.overviewHero}>
-        <Panel title="Active cohort" className={styles.heroPanel}>
-          <div className={styles.heroGrid}>
-            <div>
-              <p className={ui.muted}>Workspace</p>
-              <h2>BRCA - Stage II</h2>
+
+      <div className={ui.unifiedBoard}>
+        <div className={ui.unifiedRow}>
+          <div className={`${ui.unifiedZone} ${ui.unifiedZoneWide}`}>
+            <p className={ui.zoneLabel}>Active cohort</p>
+            <div className={ui.zoneBody}>
+              <h2 className={styles.cohortTitle}>BRCA - Stage II</h2>
               <p className={ui.muted}>Cohort coverage and twin updates remain stable across the current run.</p>
             </div>
-            <div className={styles.heroMetrics}>
-              <span><b>97%</b> fresh</span>
-              <span><b>742</b> discordant</span>
-              <span><b>2</b> queued</span>
+            <div className={ui.zoneFooter}>Monitor strip</div>
+          </div>
+          <div className={ui.unifiedZone}>
+            <p className={ui.zoneLabel}>Fresh</p>
+            <div className={ui.zoneBody}>
+              <p className={ui.metricValue}>97%</p>
             </div>
           </div>
-        </Panel>
-        <Panel title="Signal mix" className={styles.heroPanel}>
-          <div className={styles.qualityRings}>
-            <RingMetric value={96} label="TCGA" />
-            <RingMetric value={93} label="CPTAC" />
-            <RingMetric value={98} label="GTEx" />
+          <div className={ui.unifiedZone}>
+            <p className={ui.zoneLabel}>Discordant</p>
+            <div className={ui.zoneBody}>
+              <p className={ui.metricValue}>742</p>
+            </div>
           </div>
-        </Panel>
-      </div>
-      <Section title="Key metrics">
-        <div className={`${ui.grid} ${ui.four}`}>
+          <div className={ui.unifiedZone}>
+            <p className={ui.zoneLabel}>Queued</p>
+            <div className={ui.zoneBody}>
+              <p className={ui.metricValue}>2</p>
+            </div>
+          </div>
+        </div>
+
+        <div className={ui.metricStrip} style={{ border: 0, borderRadius: 0, boxShadow: "none", borderTop: "1px solid var(--line)" }}>
           {data.kpis.map((kpi) => (
-            <Panel key={kpi.label} title={kpi.label} className={styles.kpiCard}>
-              <p className={styles.kpiValue}>{kpi.value}</p>
-            </Panel>
+            <div key={kpi.label} className={ui.metricCell}>
+              <p className={ui.metricLabel}>{kpi.label}</p>
+              <p className={ui.metricValue}>{kpi.value}</p>
+            </div>
           ))}
         </div>
+      </div>
+
+      <Section title="Signal mix">
+        <div className={ui.unifiedBoard}>
+          <div className={ui.unifiedRow}>
+            <div className={ui.unifiedZone}>
+              <p className={ui.zoneLabel}>TCGA</p>
+              <div className={ui.zoneBody}>
+                <RingMetric value={96} label="Coverage" />
+              </div>
+            </div>
+            <div className={ui.unifiedZone}>
+              <p className={ui.zoneLabel}>CPTAC</p>
+              <div className={ui.zoneBody}>
+                <RingMetric value={93} label="Coverage" />
+              </div>
+            </div>
+            <div className={ui.unifiedZone}>
+              <p className={ui.zoneLabel}>GTEx</p>
+              <div className={ui.zoneBody}>
+                <RingMetric value={98} label="Coverage" />
+              </div>
+            </div>
+          </div>
+        </div>
       </Section>
+
       <Section title="Cohort coverage">
         <div className={`${ui.grid} ${ui.four}`}>
           {data.cohorts.map((cohort) => (
-            <Panel key={cohort.code} title={`${cohort.code} - ${cohort.name}`} meta={`${cohort.patients} patients`} className={styles.cohortCard}>
+            <Panel
+              key={cohort.code}
+              title={`${cohort.code} - ${cohort.name}`}
+              meta={`${cohort.patients} patients`}
+              className={styles.cohortCard}
+            >
               <StageSparkline stages={cohort.stages} />
               <div className={styles.cardFoot}>
                 <span>{cohort.risk}</span>
@@ -64,6 +104,6 @@ export function OverviewPage() {
           ))}
         </div>
       </Section>
-    </>
+    </PageShell>
   );
 }

@@ -9,7 +9,7 @@ import {
   type Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Panel } from "../../components/ui/Panel";
 import { ProgressBar } from "../../components/ui/ProgressBar";
 import { Section } from "../../components/ui/Section";
@@ -163,6 +163,7 @@ export function LiveExperimentPage({
   const [resultsFailure, setResultsFailure] = useState<{ runId: string; attempt: number; message: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const runMutationVersion = useRef(0);
 
   const currentRun = runs.find((run) => run.runId === selectedRunId) ?? runs[0];
   const selected = useMemo(
@@ -176,9 +177,11 @@ export function LiveExperimentPage({
 
   const refreshRuns = useCallback(async () => {
     if (!experiment) return;
+    const version = runMutationVersion.current;
     const response = await fetch(`/api/core/experiments/${experiment.id}/runs`, { cache: "no-store" });
     if (!response.ok) throw new Error(await messageFrom(response, "Pipeline runs could not be loaded."));
     const value = (await response.json()) as PipelineRun[];
+    if (version !== runMutationVersion.current) return;
     setRuns(value);
     setSelectedRunId((current) => (value.some((run) => run.runId === current) ? current : value[0]?.runId ?? ""));
   }, [experiment]);
@@ -222,6 +225,7 @@ export function LiveExperimentPage({
   }, [currentRun?.runId, currentRun?.status, currentRun?.attempt, experiment]);
 
   function upsertRun(run: PipelineRun) {
+    runMutationVersion.current++;
     setRuns((current) => [run, ...current.filter((item) => item.runId !== run.runId)]);
     setSelectedRunId(run.runId);
   }

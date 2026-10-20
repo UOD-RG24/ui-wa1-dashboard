@@ -42,7 +42,7 @@ export function LoginForm({
       setError("The email or password was not accepted.");
       return;
     }
-    router.replace("/");
+    router.replace("/pipeline");
     router.refresh();
   }
 
@@ -53,7 +53,7 @@ export function LoginForm({
           className={styles.ssoButton}
           type="button"
           disabled={busy}
-          onClick={() => signIn("microsoft-entra-id", { redirectTo: "/" })}
+          onClick={() => signIn("microsoft-entra-id", { redirectTo: "/pipeline" })}
         >
           <MicrosoftMark />
           Sign in or register with Microsoft

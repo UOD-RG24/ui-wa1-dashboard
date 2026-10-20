@@ -1,0 +1,150 @@
+.twinLayout {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr) minmax(240px, 280px);
+  gap: calc(18px * var(--ui-scale));
+  align-items: stretch;
+}
+
+.flowCanvas {
+  height: clamp(480px, 68vh, 720px);
+  min-height: 480px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-subtle);
+  box-shadow: var(--shadow-soft);
+}
+
+.twinAside,
+.twinPicker {
+  min-width: 0;
+}
+
+.twinPicker {
+  max-height: clamp(480px, 68vh, 720px);
+  overflow: auto;
+}
+
+.detailList {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.detailList div {
+  display: grid;
+  gap: 3px;
+  border-bottom: 1px solid var(--line);
+  padding: calc(11px * var(--ui-scale)) calc(13px * var(--ui-scale));
+}
+
+.detailList div:last-child {
+  border-bottom: 0;
+}
+
+.detailList dt {
+  color: var(--muted);
+  font-size: calc(11px * var(--ui-scale));
+  font-weight: 750;
+  text-transform: capitalize;
+}
+
+.detailList dd {
+  margin: 0;
+  color: var(--foreground);
+  font-size: calc(13px * var(--ui-scale));
+  font-weight: 750;
+}
+
+.flowNode {
+  min-width: 64px !important;
+  max-width: 110px;
+  border: 1px solid var(--line-strong) !important;
+  border-radius: var(--radius-sm) !important;
+  background: #ffffff !important;
+  color: var(--navy) !important;
+  padding: 4px 6px !important;
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: var(--shadow-soft) !important;
+  line-height: 1.2;
+}
+
+.flowNodeCompact {
+  min-width: 16px !important;
+  width: 16px;
+  height: 16px;
+  max-width: 16px;
+  padding: 0 !important;
+  border-radius: 999px !important;
+}
+
+.flowNodeLabel {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flowNodeTick {
+  display: block;
+  width: 6px;
+  height: 6px;
+  margin: 4px auto;
+  border-radius: 999px;
+  background: var(--navy);
+}
+
+.flowHandle {
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  min-width: 1px;
+  min-height: 1px;
+}
+
+.patientNodeFocus {
+  box-shadow: 0 0 0 2px var(--accent) !important;
+}
+
+.patientNode {
+  border-color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+}
+
+.flowCanvas :global(.react-flow__attribution) {
+  background: rgba(255, 255, 255, 0.78) !important;
+  color: var(--muted) !important;
+}
+
+.flowCanvas :global(.react-flow__controls),
+.flowCanvas :global(.react-flow__minimap) {
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+}
+
+.flowCanvas :global(.react-flow__controls-button) {
+  border-bottom: 1px solid var(--line) !important;
+  background: var(--surface) !important;
+}
+
+@media (max-width: 1100px) {
+  .twinLayout {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 260px);
+  }
+
+  .twinPicker {
+    grid-column: 1 / -1;
+    max-height: 220px;
+  }
+}
+
+@media (max-width: 900px) {
+  .twinLayout {
+    grid-template-columns: 1fr;
+  }
+}

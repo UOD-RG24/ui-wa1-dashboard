@@ -5,6 +5,7 @@ import data from "../data/dashboard.json";
 import { useAppShell } from "../components/providers/AppProviders";
 import { InputModalModel } from "../models/modal";
 import { ToastModel } from "../models/toast";
+import { PageShell } from "../components/dashboard/PageShell";
 import { MiniHeatmap } from "../components/ui/MiniHeatmap";
 import { Panel } from "../components/ui/Panel";
 import { Section } from "../components/ui/Section";
@@ -42,61 +43,50 @@ function OmicsLayerSection({ layerKey, layer }: { layerKey: OmicsLayerKey; layer
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showModal, showToast } = useAppShell();
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    showToast(
-      new ToastModel({
-        title: "Upload received",
-        description: `${file.name} queued for ${layer.label} matrix validation.`,
-        status: "success",
-      }),
-    );
-    event.target.value = "";
-  };
-
-  const handleVisualise = () => {
-    showModal(
-      new InputModalModel({
-        title: `${layer.label} visualisation`,
-        description: "Choose a chart title for the generated visualisation request.",
-        label: "Chart title",
-        defaultValue: `${layer.label} heatmap preview`,
-        onOk: (value) => {
-          showToast(
-            new ToastModel({
-              title: "Visualisation queued",
-              description: `"${value}" will be sent to the visualisation API when connected.`,
-              status: "info",
-            }),
-          );
-        },
-      }),
-    );
-  };
-
   return (
     <Section title={layer.label}>
       <div className={styles.layerGrid}>
-        <Panel title="Upload" meta="Matrix file">
-          <p className={ui.muted}>Upload a matrix file for {layer.label.toLowerCase()} analysis.</p>
-          <input ref={fileInputRef} type="file" accept=".csv,.tsv,.txt,.xlsx" hidden onChange={handleFileSelected} />
-          <button className={ui.primaryAction} type="button" onClick={handleUploadClick}>
-            Upload matrix
+        <Panel title="Preview matrix" meta="Mock preview">
+          <p className={ui.muted}>
+            Layer previews remain illustrative until matrix-read APIs are available. Dataset file ops use the actions
+            above.
+          </p>
+          <input ref={fileInputRef} type="file" accept=".csv,.tsv,.txt,.xlsx" hidden />
+          <button
+            className={ui.primaryAction}
+            type="button"
+            onClick={() => {
+              showToast(
+                new ToastModel({
+                  title: "Preview only",
+                  description: `Use Upload dataset in the sidebar to create API-backed ${layer.label} files.`,
+                  status: "info",
+                }),
+              );
+            }}
+          >
+            Preview hint
           </button>
         </Panel>
 
         <Panel title="Matrix Information" meta={layer.matrix.format}>
           <div className={styles.matrixInfo}>
-            <span><b>Rows</b>{layer.matrix.rows.toLocaleString()}</span>
-            <span><b>Columns</b>{layer.matrix.columns.toLocaleString()}</span>
-            <span><b>Missing</b>{layer.matrix.missing}</span>
-            <span><b>Format</b>{layer.matrix.format}</span>
+            <span>
+              <b>Rows</b>
+              {layer.matrix.rows.toLocaleString()}
+            </span>
+            <span>
+              <b>Columns</b>
+              {layer.matrix.columns.toLocaleString()}
+            </span>
+            <span>
+              <b>Missing</b>
+              {layer.matrix.missing}
+            </span>
+            <span>
+              <b>Format</b>
+              {layer.matrix.format}
+            </span>
           </div>
         </Panel>
 
@@ -115,7 +105,29 @@ function OmicsLayerSection({ layerKey, layer }: { layerKey: OmicsLayerKey; layer
 
         <Panel title="Visualisation" meta="Preview">
           <MiniHeatmap variant={heatmapVariant[layerKey]} />
-          <button className={`${ui.button} ${styles.visualiseButton}`} type="button" onClick={handleVisualise}>
+          <button
+            className={`${ui.button} ${styles.visualiseButton}`}
+            type="button"
+            onClick={() => {
+              showModal(
+                new InputModalModel({
+                  title: `${layer.label} visualisation`,
+                  description: "Choose a chart title for a future visualisation request.",
+                  label: "Chart title",
+                  defaultValue: `${layer.label} heatmap preview`,
+                  onOk: (value) => {
+                    showToast(
+                      new ToastModel({
+                        title: "Visualisation queued",
+                        description: `"${value}" is not connected to an API yet.`,
+                        status: "info",
+                      }),
+                    );
+                  },
+                }),
+              );
+            }}
+          >
             Generate visualisation
           </button>
         </Panel>
@@ -124,25 +136,68 @@ function OmicsLayerSection({ layerKey, layer }: { layerKey: OmicsLayerKey; layer
   );
 }
 
-export function DatasetsPage({ dataset }: { dataset: DatasetItem }) {
+export function DatasetsPage({
+  dataset,
+  onRename,
+  onDownload,
+  onDelete,
+}: {
+  dataset: DatasetItem;
+  onRename?: () => void;
+  onDownload?: () => void;
+  onDelete?: () => void;
+}) {
   const omicsLayers = data.omicsLayers as Record<OmicsLayerKey, OmicsLayer>;
 
   return (
-    <>
-      <Section title="Selected dataset">
-        <Panel title={dataset.name} meta={dataset.type}>
-          <div className={styles.datasetStats}>
-            <span><b>{dataset.samples.toLocaleString()}</b>samples</span>
-            <span><b>{dataset.features.toLocaleString()}</b>features</span>
-            <span><b>{dataset.quality}%</b>quality</span>
-            <span><b>{dataset.updated}</b>updated</span>
-          </div>
-        </Panel>
-      </Section>
+    <PageShell
+      category="Dataset"
+      title={dataset.name}
+      actions={
+        <>
+          {onRename ? (
+            <button className={ui.button} type="button" onClick={onRename}>
+              Rename
+            </button>
+          ) : null}
+          {onDownload ? (
+            <button className={ui.button} type="button" onClick={onDownload}>
+              Download
+            </button>
+          ) : null}
+          {onDelete ? (
+            <button className={ui.button} type="button" onClick={onDelete}>
+              Delete
+            </button>
+          ) : null}
+        </>
+      }
+    >
+      <div className={ui.metricStrip}>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Samples</p>
+          <p className={ui.metricValue}>{dataset.samples.toLocaleString()}</p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Features</p>
+          <p className={ui.metricValue}>{dataset.features.toLocaleString()}</p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Quality</p>
+          <p className={ui.metricValue}>{dataset.quality}%</p>
+        </div>
+        <div className={ui.metricCell}>
+          <p className={ui.metricLabel}>Updated</p>
+          <p className={ui.metricValue} style={{ fontSize: "calc(18px * var(--ui-scale))" }}>
+            {dataset.updated}
+          </p>
+          <p className={ui.metricDetail}>{dataset.type}</p>
+        </div>
+      </div>
 
       {layerKeys.map((layerKey) => (
         <OmicsLayerSection key={layerKey} layerKey={layerKey} layer={omicsLayers[layerKey]} />
       ))}
-    </>
+    </PageShell>
   );
 }

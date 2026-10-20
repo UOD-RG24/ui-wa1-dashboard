@@ -1,6 +1,6 @@
 # Genome dashboard frontend
 
-Next.js/React dashboard for authenticated experiments, streaming dataset upload, hosted pipeline runs and run-scoped live digital twins. Local fixtures are isolated behind `/?mode=demo`.
+Next.js/React dashboard with the existing workspace at `/` and the authenticated hosted pipeline at `/pipeline`. Pipeline fixtures are isolated behind `/pipeline?mode=demo`.
 
 ## Local development
 
@@ -15,7 +15,7 @@ npm run dev
 
 Copy [`.env.example`](.env.example) to a private local environment file. Default address: `http://localhost:3000`. `npm run build` creates the production build and `npm start` serves it. `npm run test:e2e` runs the Auth.js/pipeline acceptance flow against the bundled mock core API after Playwright Chromium is installed.
 
-Start with [auth.ts](auth.ts), [app/api/core](app/api/core), [app/page.tsx](app/page.tsx), and [LiveExperimentPage](app/views/live/LiveExperimentPage.tsx). Follow [AGENTS.md](AGENTS.md) and the installed Next.js documentation before code changes. The core authentication/data API is the separate .NET service; the Nest scaffold is outside the execution path.
+Start with [auth.ts](auth.ts), [app/api/core](app/api/core), [app/PipelineHome.tsx](app/PipelineHome.tsx), and [LiveExperimentPage](app/views/live/LiveExperimentPage.tsx). Follow [AGENTS.md](AGENTS.md) and the installed Next.js documentation before code changes. The hosted pipeline core API is the separate .NET service.
 
 - [Dashboard behavior and source map](../docs/dashboard-guide.md)
 - [Customer-facing biological overview](../../docs/project-overview.md)

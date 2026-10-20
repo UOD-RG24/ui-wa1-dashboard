@@ -1,22 +1,23 @@
 # Multi Omics Dashboard guide
 
-The dashboard is the authenticated entry point for the fixed mRNA + CNA + AJCC digital-twin pipeline. Live core API records are the default. The earlier fixture experience remains available only at `/?mode=demo`, carries a persistent **Demo data** banner, and never mixes fixture and live records.
+The hosted mRNA + CNA + AJCC pipeline is available at `/pipeline` in the same deployed dashboard as the existing experiment, multi-omics and digital-twin workspace at `/`. Live core API records are the pipeline default. Isolated fixtures are available only at `/pipeline?mode=demo` and carry a persistent **Demo data** banner.
 
-The production execution path is Next.js → `core-wa1-api` → a manually triggered Azure Container Apps Job. The Nest project is a retained scaffold and is outside the runtime and production startup path.
+The hosted execution path is Next.js → `core-wa1-api` → a manually triggered Azure Container Apps Job. The retained workspace at `/` uses its existing browser sign-in and API integration; `/pipeline` uses Auth.js and allowlisted server routes. The Nest project is built in CI but is outside the hosted pipeline runtime path.
 
 ## Routes and authentication
 
 | Route | Behaviour |
 | --- | --- |
-| `/` | Authenticated live experiments, datasets, pipeline runs and run-scoped twins |
-| `/?mode=demo` | Isolated, non-persistent fixtures; it cannot start a live pipeline |
-| `/login` | Microsoft Entra sign-in in deployed environments; local credentials only in explicit development mode |
+| `/` and `/login` | Existing workspace and its sign-in |
+| `/pipeline` | Authenticated live experiments, datasets, pipeline runs and run-scoped twins |
+| `/pipeline?mode=demo` | Isolated, non-persistent fixture preview; it cannot start a live pipeline |
+| `/pipeline/login` | Hosted pipeline Microsoft sign-in; local credentials only in explicit development mode |
 | `/api/auth/[...nextauth]` | Auth.js handlers |
 | `/api/core/...` | Explicit allowlisted server-side proxy routes to `core-wa1-api` |
 
 Microsoft access tokens are exchanged through the core API's Microsoft status/sign-up/sign-in endpoints. The returned core API token is stored only inside the encrypted HTTP-only Auth.js JWT cookie and is decoded only by server route handlers. It is not added to the browser session object or returned to client code.
 
-Local email/password is available only when `NODE_ENV` is not `production` and `ALLOW_LOCAL_AUTH=true`. Every `/api/core` route independently requires a valid Auth.js token; the page redirect in `proxy.ts` is an additional user-experience guard, not the authorization boundary.
+Local email/password for `/pipeline` is available only when `NODE_ENV` is not `production` and `ALLOW_LOCAL_AUTH=true`. Every `/api/core` route independently requires a valid Auth.js token; the `/pipeline` redirect in `proxy.ts` is an additional user-experience guard, not the authorization boundary.
 
 ## Run a live pipeline
 
@@ -61,7 +62,7 @@ After success, the dashboard calls the run-scoped twins endpoint. The core API r
 
 ## Demo mode
 
-Open `/?mode=demo` to show the original fixture experiments, dataset previews, illustrative graph and profile. The banner remains visible while fixtures are active and links back to live mode. Demo mode does not call the live list endpoints and live mode does not import `dashboard.json` records into its lists.
+Open `/pipeline?mode=demo` to preview isolated fixture names and datasets. The banner remains visible while fixtures are active and links back to live mode. Demo mode does not call the live list endpoints and live mode does not import `dashboard.json` records into its lists.
 
 The dormant overview, patient, omics, cluster and agent prototype components are still not reachable. They are not accepted live features.
 
@@ -75,7 +76,7 @@ The dashboard exposes only these core operations:
 - run list, start, get, cancel and retry;
 - run-scoped live twin results.
 
-There is no generic proxy and no caller-supplied upstream URL. Dataset request bodies are forwarded as streams without converting the file to an in-memory `FormData` object in the Next route handler.
+The hosted pipeline has no generic proxy and no caller-supplied upstream URL. Its `/api/core` handlers take priority over the existing workspace BFF fallback rewrite. Dataset request bodies are forwarded as streams without converting the file to an in-memory `FormData` object in the Next route handler.
 
 ## Configuration
 
@@ -124,10 +125,10 @@ The component suite covers authentication-mode visibility, demo isolation and th
 | Page redirect guard | `frontend/proxy.ts` |
 | Core token decode and upstream forwarding | `frontend/app/lib/coreApi.server.ts` |
 | Allowlisted routes | `frontend/app/api/core/` |
-| Live/fixture mode selection | `frontend/app/page.tsx` |
+| Live/fixture mode selection and hosted route | `frontend/app/PipelineHome.tsx` and `frontend/app/pipeline/` |
 | Three-slot run workflow and live graph | `frontend/app/views/live/LiveExperimentPage.tsx` |
 | Live dataset/profile views | `frontend/app/views/live/` |
-| Isolated fixture views | `frontend/app/views/ExperimentPage.tsx`, `DatasetsPage.tsx`, `ProfilePage.tsx` |
+| Isolated fixture preview | `frontend/app/PipelineHome.tsx` |
 | Component and browser tests | `frontend/tests/` |
 
 ## Release boundary

@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 test("local JWT sign-in runs the fixed pipeline and renders live twins", async ({ page }) => {
-  await page.goto("/login");
+  await page.goto("/pipeline/login");
   await page.getByLabel("Email address").fill("ada@example.org");
   await page.getByLabel("Password").fill("correct-horse-battery-staple");
   await page.getByRole("button", { name: "Sign in with local JWT" }).click();
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL(/\/pipeline$/);
   await expect(page.getByText("Mock end-to-end cohort").first()).toBeVisible();
 
   const slots = page.getByLabel("Owned dataset");
@@ -20,11 +20,11 @@ test("local JWT sign-in runs the fixed pipeline and renders live twins", async (
   await expect(page.getByText("2 / 2 twins live")).toBeVisible();
 
   await page.getByRole("button", { name: "Sign-Out" }).click();
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(/\/pipeline\/login/);
 });
 
 test("demo mode is visibly isolated from live records", async ({ page }) => {
-  await page.goto("/?mode=demo");
+  await page.goto("/pipeline?mode=demo");
   await expect(page.getByText("Demo data")).toBeVisible();
   await expect(page.getByText("CPTAC BRCA twin integration").first()).toBeVisible();
   await expect(page.getByText("Mock end-to-end cohort")).toHaveCount(0);
