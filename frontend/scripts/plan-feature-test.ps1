@@ -216,5 +216,3 @@ if ($fail -gt 0) {
   Write-Host "FAILURES:"
   $results | Where-Object { -not $_.Pass } | Format-Table -AutoSize | Out-String -Width 220 | Write-Host
 }
-
-

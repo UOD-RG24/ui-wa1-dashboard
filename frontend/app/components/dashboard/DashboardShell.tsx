@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   FiActivity,
@@ -88,11 +89,6 @@ export function DashboardShell({
     media.addEventListener("change", sync);
     return () => media.removeEventListener("change", sync);
   }, []);
-
-  useEffect(() => {
-    setMobileOpen(false);
-    setAvatarMenuOpen(false);
-  }, [mainView, selectedExperimentId, selectedDatasetId]);
 
   useEffect(() => {
     if (!avatarMenuOpen) return;
@@ -326,6 +322,16 @@ export function DashboardShell({
             </span>
             {!railMode ? <span className={styles.navLabel}>Digital Twin</span> : null}
           </button>
+
+          <Link
+            href="/pipeline"
+            className={styles.navFlat}
+            onClick={closeMobile}
+            data-tooltip={railMode ? "Hosted pipeline" : undefined}
+          >
+            <span className={styles.navIcon} aria-hidden="true"><FiActivity /></span>
+            {!railMode ? <span className={styles.navLabel}>Hosted pipeline</span> : null}
+          </Link>
 
           <button
             type="button"

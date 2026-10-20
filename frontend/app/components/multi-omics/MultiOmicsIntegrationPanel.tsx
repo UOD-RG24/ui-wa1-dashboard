@@ -31,7 +31,8 @@ export function MultiOmicsIntegrationPanel({
   onWorkflowRefresh: () => void;
 }) {
   const { showToast } = useAppShell();
-  const [datasetId, setDatasetId] = useState(datasets[0]?.id ?? "");
+  const [selectedDatasetId, setDatasetId] = useState(datasets[0]?.id ?? "");
+  const datasetId = selectedDatasetId || datasets[0]?.id || "";
   const [blobs, setBlobs] = useState<Blob[]>([]);
   const [activeStep, setActiveStep] = useState(0);
   const [hasFeatureExtraction, setHasFeatureExtraction] = useState(false);
@@ -59,12 +60,9 @@ export function MultiOmicsIntegrationPanel({
   }, [experimentId, notifyError]);
 
   useEffect(() => {
-    void refreshBlobs();
+    const timer = window.setTimeout(() => { void refreshBlobs(); }, 0);
+    return () => window.clearTimeout(timer);
   }, [refreshBlobs]);
-
-  useEffect(() => {
-    if (!datasetId && datasets[0]?.id) setDatasetId(datasets[0].id);
-  }, [datasetId, datasets]);
 
   const handleFeatureExtractionComplete = useCallback(() => {
     setHasFeatureExtraction(true);

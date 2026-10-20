@@ -31,7 +31,8 @@ export function DigitalTwinsPanel({
   onWorkflowRefresh: () => void;
 }) {
   const { showToast } = useAppShell();
-  const [datasetId, setDatasetId] = useState(datasets[0]?.id ?? "");
+  const [selectedDatasetId, setDatasetId] = useState(datasets[0]?.id ?? "");
+  const datasetId = selectedDatasetId || datasets[0]?.id || "";
   const [blobs, setBlobs] = useState<Blob[]>([]);
   const [selectedBlobIds, setSelectedBlobIds] = useState<string[]>([]);
   const [moiFinalIds, setMoiFinalIds] = useState<string[]>([]);
@@ -77,12 +78,9 @@ export function DigitalTwinsPanel({
   }, [experimentId, notifyError]);
 
   useEffect(() => {
-    void refreshBlobs();
+    const timer = window.setTimeout(() => { void refreshBlobs(); }, 0);
+    return () => window.clearTimeout(timer);
   }, [refreshBlobs]);
-
-  useEffect(() => {
-    if (!datasetId && datasets[0]?.id) setDatasetId(datasets[0].id);
-  }, [datasetId, datasets]);
 
   const ensureDtdl = useCallback(async () => {
     try {

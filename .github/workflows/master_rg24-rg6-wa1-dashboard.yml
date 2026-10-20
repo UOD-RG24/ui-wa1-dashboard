@@ -1,14 +1,15 @@
 name: Build and deploy Node.js app to Azure Web App - rg24-rg6-wa1-dashboard
 
 on:
+  pull_request:
+    branches: [master]
   push:
-    branches:
-      - master
+    branches: [master]
   workflow_dispatch:
 
 concurrency:
-  group: rg24-rg6-wa1-dashboard-production
-  cancel-in-progress: true
+  group: rg24-rg6-wa1-dashboard-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -37,19 +38,25 @@ jobs:
           npm ci --prefix frontend
           npm ci --prefix backend
 
-      - name: Build application
+      - name: Verify frontend
         env:
           NEXT_PUBLIC_AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
           NEXT_PUBLIC_AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
           NEXT_PUBLIC_AZURE_AD_API_SCOPE: ${{ secrets.AZURE_AD_API_SCOPE }}
-          # Until Nest is deployed, production rewrites /api to core-wa1-api.
           DASHBOARD_BFF_URL: ${{ vars.DASHBOARD_BFF_URL }}
         run: |
+          npm run lint --prefix frontend
+          npm test --prefix frontend
           npm run build --prefix frontend
-          npm run build --prefix backend
 
-      - name: Run tests
-        run: npm run test --if-present
+      - name: Verify retained Nest backend
+        run: npm run build --prefix backend
+
+      - name: Browser acceptance
+        run: |
+          cd frontend
+          npx playwright install --with-deps chromium
+          npm run test:e2e
 
       - name: Prepare production frontend dependencies
         run: |
@@ -93,6 +100,8 @@ jobs:
           retention-days: 1
 
   deploy:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
+    environment: production
     runs-on: ubuntu-latest
     needs: build
 

@@ -1,7 +1,7 @@
 export type ModalKind = "information" | "confirm" | "input";
 
 export class InfoModalModel {
-  kind: "information" = "information";
+  kind = "information" as const;
   title: string;
   description: string;
   onOk?: () => void;
@@ -14,7 +14,7 @@ export class InfoModalModel {
 }
 
 export class ConfirmModalModel {
-  kind: "confirm" = "confirm";
+  kind = "confirm" as const;
   title: string;
   description: string;
   onYes?: () => void;
@@ -39,7 +39,7 @@ export class ConfirmModalModel {
 }
 
 export class InputModalModel {
-  kind: "input" = "input";
+  kind = "input" as const;
   title: string;
   description: string;
   label: string;

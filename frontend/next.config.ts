@@ -24,12 +24,10 @@ const nextConfig: NextConfig = {
     },
   },
   async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${bff}/:path*`,
-      },
-    ];
+    // App Router's /api/core and /api/auth handlers must win over the legacy BFF.
+    return {
+      fallback: [{ source: "/api/:path*", destination: `${bff}/:path*` }],
+    };
   },
 };
 

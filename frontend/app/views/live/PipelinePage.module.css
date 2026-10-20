@@ -1,0 +1,187 @@
+.createRow {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.createRow label,
+.runToolbar label {
+  margin: 0;
+}
+
+.metaRow,
+.resultSummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.metaRow span,
+.resultSummary span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  padding: 10px;
+  font-size: 12px;
+}
+
+.metaRow b,
+.resultSummary b {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.fileLabel {
+  margin-top: 12px;
+}
+
+.validationList,
+.recipe {
+  display: grid;
+  gap: 7px;
+  margin: 12px 0 0;
+  padding-left: 20px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.validationList li::marker {
+  color: var(--hot);
+}
+
+.validationList li[data-ok="true"]::marker {
+  color: var(--good);
+}
+
+.contractNote,
+.errorBox {
+  margin: 14px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.confirmation {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin: 18px 0 14px;
+}
+
+.confirmation input {
+  margin-top: 1px;
+}
+
+.errorBox {
+  display: grid;
+  border-color: #d4a18c;
+  background: var(--hot-soft);
+  color: #713a24;
+}
+
+.runToolbar {
+  display: flex;
+  gap: 14px;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.runToolbar label {
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.stageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.stageGrid small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.twinLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.flowCanvas {
+  height: 540px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+}
+
+.twinNode {
+  min-width: 138px !important;
+  border: 1px solid var(--accent) !important;
+  border-radius: 4px !important;
+  background: #fff !important;
+  color: var(--navy) !important;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.propertyList {
+  display: grid;
+  gap: 0;
+  max-height: 480px;
+  margin: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+}
+
+.propertyList div {
+  display: grid;
+  gap: 3px;
+  border-bottom: 1px solid var(--line);
+  padding: 9px;
+}
+
+.propertyList dt {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.propertyList dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+@media (max-width: 980px) {
+  .stageGrid,
+  .metaRow,
+  .resultSummary,
+  .twinLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .createRow,
+  .runToolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

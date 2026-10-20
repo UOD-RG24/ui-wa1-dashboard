@@ -15,4 +15,8 @@ npm install
 npm run dev
 ```
 
-Configure API routing with `NEXT_PUBLIC_API_BASE_URL` and `API_UPSTREAM_URL` (see [auth docs](./docs/AUTH.md)).
+Configure the existing workspace according to the [auth docs](./docs/AUTH.md) and the hosted pipeline with [`frontend/.env.example`](./frontend/.env.example).
+
+## Hosted pipeline
+
+The fixed 13-stage Azure pipeline is available at `/pipeline` on the same dashboard deployment. It uses Auth.js and the .NET core API, with a separate `/pipeline/login` sign-in and an isolated `/pipeline?mode=demo` fixture preview. The existing workspace at `/` remains available. See the [hosted pipeline guide](./docs/dashboard-guide.md) for configuration, reviewer checks and replay behavior.

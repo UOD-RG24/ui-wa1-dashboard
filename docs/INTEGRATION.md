@@ -8,7 +8,7 @@ How the Multi Omics Dashboard talks to `core-wa1-api` through the Nest BFF.
 Browser → /api/* → Next rewrite (DASHBOARD_BFF_URL) → Nest BFF → CORE_API_URL (core-wa1-api)
 ```
 
-Locally, `DASHBOARD_BFF_URL` defaults to `http://127.0.0.1:3001`.  
+Locally, `DASHBOARD_BFF_URL` defaults to `http://127.0.0.1:3001`.
 Until Nest is deployed, production may rewrite directly to `core-wa1-api` (same resource paths).
 
 Nested experiment routes (multi-omics and digital twins, including `PATCH`) are forwarded by the Nest experiments catch-all.
