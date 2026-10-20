@@ -146,6 +146,33 @@ describe("dashboard live and demo boundaries", () => {
     expect(screen.getAllByText("The pipeline worker could not be started.")).not.toHaveLength(0);
   });
 
+  it("reuses the request key after an interrupted start", async () => {
+    const keys: string[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        keys.push(new Headers(init.headers).get("Idempotency-Key") ?? "");
+        if (keys.length === 1) throw new TypeError("connection dropped");
+        return Response.json(pipelineRun("queued"), { status: 202 });
+      }
+      return Response.json([]);
+    }));
+    render(
+      <LiveExperimentPage experiment={experiment} datasets={datasets}
+        onDatasetCreated={vi.fn()} onExperimentCreated={vi.fn()} />,
+    );
+    const selects = screen.getAllByLabelText("Owned dataset");
+    datasets.forEach((dataset, index) => fireEvent.change(selects[index], { target: { value: dataset.id } }));
+    fireEvent.click(screen.getByLabelText(/I confirm these files contain de-identified research data/));
+    const start = screen.getByRole("button", { name: "Start fixed pipeline" });
+    fireEvent.click(start);
+    expect(await screen.findByText(/The request was interrupted/)).toBeInTheDocument();
+    expect(start).toBeEnabled();
+    fireEvent.click(start);
+    await waitFor(() => expect(keys).toHaveLength(2));
+    expect(keys[0]).toBeTruthy();
+    expect(keys[1]).toBe(keys[0]);
+  });
+
   it("does not show a previous attempt's twins when replay verification fails", async () => {
     const run = pipelineRun("succeeded");
     const twins: PipelineTwinResults = {

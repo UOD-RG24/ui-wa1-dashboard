@@ -164,6 +164,7 @@ export function LiveExperimentPage({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const runMutationVersion = useRef(0);
+  const pendingStartKey = useRef<string | null>(null);
 
   const currentRun = runs.find((run) => run.runId === selectedRunId) ?? runs[0];
   const selected = useMemo(
@@ -300,47 +301,63 @@ export function LiveExperimentPage({
     if (!experiment || !ready || !confirmed) return;
     setBusy("start");
     setError(null);
-    const response = await fetch(`/api/core/experiments/${experiment.id}/runs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Idempotency-Key": crypto.randomUUID(),
-      },
-      body: JSON.stringify({
-        contractVersion: "tcga-mrna-cna-ajcc/1.0",
-        inputs: {
-          mrnaDatasetId: selection.mrna,
-          cnaDatasetId: selection.cna,
-          clinicalDatasetId: selection.clinical,
+    pendingStartKey.current ??= crypto.randomUUID();
+    try {
+      const response = await fetch(`/api/core/experiments/${experiment.id}/runs`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": pendingStartKey.current,
         },
-      }),
-    });
-    setBusy(null);
-    if (!response.ok) {
-      const failedRun = await failedDispatch(response);
-      return setError(failedRun?.error?.message ?? await messageFrom(response, "The pipeline run could not be started."));
+        body: JSON.stringify({
+          contractVersion: "tcga-mrna-cna-ajcc/1.0",
+          inputs: {
+            mrnaDatasetId: selection.mrna,
+            cnaDatasetId: selection.cna,
+            clinicalDatasetId: selection.clinical,
+          },
+        }),
+      });
+      pendingStartKey.current = null;
+      if (!response.ok) {
+        const failedRun = await failedDispatch(response);
+        setError(failedRun?.error?.message ?? await messageFrom(response, "The pipeline run could not be started."));
+        return;
+      }
+      const run = (await response.json()) as PipelineRun;
+      upsertRun(run);
+      showDispatchWarning(response);
+    } catch {
+      setError("The request was interrupted. Check run history, then retry with the same request key.");
+      refreshRuns().catch(() => undefined);
+    } finally {
+      setBusy(null);
     }
-    const run = (await response.json()) as PipelineRun;
-    upsertRun(run);
-    showDispatchWarning(response);
   }
 
   async function runAction(action: "cancel" | "retry") {
     if (!experiment || !currentRun) return;
     setBusy(action);
     setError(null);
-    const response = await fetch(
-      `/api/core/experiments/${experiment.id}/runs/${currentRun.runId}/${action}`,
-      { method: "POST" },
-    );
-    setBusy(null);
-    if (!response.ok) {
-      const failedRun = await failedDispatch(response);
-      return setError(failedRun?.error?.message ?? await messageFrom(response, `Run ${action} failed.`));
+    try {
+      const response = await fetch(
+        `/api/core/experiments/${experiment.id}/runs/${currentRun.runId}/${action}`,
+        { method: "POST" },
+      );
+      if (!response.ok) {
+        const failedRun = await failedDispatch(response);
+        setError(failedRun?.error?.message ?? await messageFrom(response, `Run ${action} failed.`));
+        return;
+      }
+      const run = (await response.json()) as PipelineRun;
+      upsertRun(run);
+      showDispatchWarning(response);
+    } catch {
+      setError(`The ${action} request was interrupted. Run history will show its saved state.`);
+      refreshRuns().catch(() => undefined);
+    } finally {
+      setBusy(null);
     }
-    const run = (await response.json()) as PipelineRun;
-    upsertRun(run);
-    showDispatchWarning(response);
   }
 
   return (
