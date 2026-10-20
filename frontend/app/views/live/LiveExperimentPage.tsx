@@ -159,7 +159,8 @@ export function LiveExperimentPage({
   const [confirmed, setConfirmed] = useState(false);
   const [runs, setRuns] = useState<PipelineRun[]>([]);
   const [selectedRunId, setSelectedRunId] = useState("");
-  const [results, setResults] = useState<PipelineTwinResults | null>(null);
+  const [results, setResults] = useState<{ attempt: number; data: PipelineTwinResults } | null>(null);
+  const [resultsFailure, setResultsFailure] = useState<{ runId: string; attempt: number; message: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -208,12 +209,39 @@ export function LiveExperimentPage({
         if (!response.ok) throw new Error(await messageFrom(response, "Live twins could not be loaded."));
         return (await response.json()) as PipelineTwinResults;
       })
-      .then(setResults)
+      .then((data) => {
+        setResults({ attempt: currentRun.attempt, data });
+        setResultsFailure(null);
+      })
       .catch((reason: Error) => {
-        if (reason.name !== "AbortError") setError(reason.message);
+        if (reason.name !== "AbortError") {
+          setResultsFailure({ runId: currentRun.runId, attempt: currentRun.attempt, message: reason.message });
+        }
       });
     return () => controller.abort();
-  }, [currentRun?.runId, currentRun?.status, experiment]);
+  }, [currentRun?.runId, currentRun?.status, currentRun?.attempt, experiment]);
+
+  function upsertRun(run: PipelineRun) {
+    setRuns((current) => [run, ...current.filter((item) => item.runId !== run.runId)]);
+    setSelectedRunId(run.runId);
+  }
+
+  async function failedDispatch(response: Response): Promise<PipelineRun | null> {
+    if (response.status !== 503) return null;
+    const value: unknown = await response.clone().json().catch(() => null);
+    if (!value || typeof value !== "object" || !("runId" in value) ||
+        typeof value.runId !== "string" || !("stages" in value) ||
+        !Array.isArray(value.stages)) return null;
+    const run = value as PipelineRun;
+    upsertRun(run);
+    return run;
+  }
+
+  function showDispatchWarning(response: Response) {
+    if (response.headers.get("X-Pipeline-Dispatch") === "disabled") {
+      setError("The pipeline run was saved, but the Azure runner is not configured. Check the deployment before retrying.");
+    }
+  }
 
   async function createExperiment(event: React.FormEvent) {
     event.preventDefault();
@@ -284,10 +312,13 @@ export function LiveExperimentPage({
       }),
     });
     setBusy(null);
-    if (!response.ok) return setError(await messageFrom(response, "The pipeline run could not be started."));
+    if (!response.ok) {
+      const failedRun = await failedDispatch(response);
+      return setError(failedRun?.error?.message ?? await messageFrom(response, "The pipeline run could not be started."));
+    }
     const run = (await response.json()) as PipelineRun;
-    setRuns((current) => [run, ...current.filter((item) => item.runId !== run.runId)]);
-    setSelectedRunId(run.runId);
+    upsertRun(run);
+    showDispatchWarning(response);
   }
 
   async function runAction(action: "cancel" | "retry") {
@@ -299,9 +330,13 @@ export function LiveExperimentPage({
       { method: "POST" },
     );
     setBusy(null);
-    if (!response.ok) return setError(await messageFrom(response, `Run ${action} failed.`));
+    if (!response.ok) {
+      const failedRun = await failedDispatch(response);
+      return setError(failedRun?.error?.message ?? await messageFrom(response, `Run ${action} failed.`));
+    }
     const run = (await response.json()) as PipelineRun;
-    setRuns((current) => current.map((item) => (item.runId === run.runId ? run : item)));
+    upsertRun(run);
+    showDispatchWarning(response);
   }
 
   return (
@@ -443,18 +478,22 @@ export function LiveExperimentPage({
 
           {currentRun?.status === "succeeded" ? (
             <Section title="Run-scoped live digital twins">
-              {results?.runId === currentRun.runId ? (
+              {results?.data.runId === currentRun.runId && results.attempt === currentRun.attempt ? (
                 <>
                   <div className={styles.resultSummary}>
-                    <span><b>{results.liveTwinCount}</b> / {results.expectedTwinCount} twins live</span>
-                    <span><b>{results.liveRelationshipCount}</b> / {results.expectedRelationshipCount} relationships live</span>
-                    <span><b>{results.failures.length}</b> verification failures</span>
+                    <span><b>{results.data.liveTwinCount}</b> / {results.data.expectedTwinCount} twins live</span>
+                    <span><b>{results.data.liveRelationshipCount}</b> / {results.data.expectedRelationshipCount} relationships live</span>
+                    <span><b>{results.data.failures.length}</b> verification failures</span>
                   </div>
-                  <RunGraph results={results} />
+                  <RunGraph key={`${currentRun.runId}:${currentRun.attempt}`} results={results.data} />
                 </>
               ) : (
-                <Panel title="Live verification" meta="Loading">
-                  <p className={ui.muted}>Reading only the twin and relationship IDs recorded by this run.</p>
+                <Panel title="Live verification" meta={resultsFailure?.runId === currentRun.runId && resultsFailure.attempt === currentRun.attempt ? "Unavailable" : "Loading"}>
+                  <p className={ui.muted}>
+                    {resultsFailure?.runId === currentRun.runId && resultsFailure.attempt === currentRun.attempt
+                      ? resultsFailure.message
+                      : "Reading only the twin and relationship IDs recorded by this run."}
+                  </p>
                 </Panel>
               )}
             </Section>

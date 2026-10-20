@@ -90,7 +90,7 @@ AUTH_MICROSOFT_ENTRA_ID_SCOPE
 CORE_API_BASE_URL
 ```
 
-The Entra scope must produce an access token accepted by the core API. Add the deployed Auth.js callback URL (`/api/auth/callback/microsoft-entra-id`) to the Entra application. Use HTTPS for `CORE_API_BASE_URL` in production.
+The Entra scope must produce an access token accepted by the core API. Set `AUTH_MICROSOFT_ENTRA_ID_SCOPE` to `openid profile email api://<core-api-app-client-id>/access_as_user`, using the API registration's actual application ID URI. Add the deployed Auth.js callback URL (`/api/auth/callback/microsoft-entra-id`) to the dashboard Entra application. Use HTTPS for `CORE_API_BASE_URL` in production.
 
 For local JWT development:
 
